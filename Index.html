@@ -469,19 +469,17 @@ function decrementBoxStock(name){
 }
 document.addEventListener('DOMContentLoaded', renderBoxStocks);
 
-var auctions = JSON.parse(localStorage.getItem('reboxAuctions')||'null') || [
-  {id:1, name:'Pacco Grande Misterioso', bid:120, end: Date.now()+2*3600*1000+14*60*1000+33*1000, yt:'', bids:[{who:'Marco', amt:120, when:'ora'},{who:'Elena', amt:115, when:'10 min fa'},{who:'Luca', amt:110, when:'22 min fa'}], closed:false},
-  {id:2, name:'Set Cucina Misterioso', bid:28, end: Date.now()+5*3600*1000+22*60*1000+10*1000, yt:'', bids:[{who:'Giulia', amt:28, when:'ora'},{who:'Paolo', amt:23, when:'18 min fa'},{who:'Sara', amt:18, when:'35 min fa'}], closed:false},
-  {id:3, name:'Tech Misterioso', bid:32, end: Date.now()+1*3600*1000+5*60*1000+44*1000, yt:'', bids:[{who:'Anna', amt:32, when:'ora'},{who:'Davide', amt:27, when:'5 min fa'},{who:'Marta', amt:22, when:'12 min fa'}], closed:false}
-];
+var auctions = JSON.parse(localStorage.getItem('reboxAuctions')||'[]'); // PUBBLICO - Niente aste esempio. Se Admin cancella, qui resta vuoto.
 function saveAuctions(){ localStorage.setItem('reboxAuctions', JSON.stringify(auctions)); }
+async function loadAuctionsFromCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.auctions',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let j=await r.json(); if(j&&j[0]&&Array.isArray(j[0].value)){ auctions=j[0].value; localStorage.setItem('reboxAuctions',JSON.stringify(auctions)); renderAuctions(); } }catch(e){ console.log('load aste cloud',e); } }
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadAuctionsFromCloud,800); });
 function fmtTime(ms){
   if(ms<=0) return 'CHIUSA';
   let s=Math.floor(ms/1000); let h=Math.floor(s/3600); let m=Math.floor((s%3600)/60); let sec=s%60;
   return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
 }
 function renderAuctions(){
-  let grid=document.getElementById('auctionsGrid'); if(!grid) return;
+  let grid=document.getElementById('auctionsGrid'); if(!grid) return; if(!auctions || auctions.length===0){ grid.innerHTML='<p style="background:#fff;padding:14px;border-radius:12px;text-align:center">Nessuna asta al momento. Torna presto!</p>'; return; }
   grid.innerHTML='<div class="grid">'+auctions.map((a,i)=>{
     let ytId='';
     if(a.yt){
