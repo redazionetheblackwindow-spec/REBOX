@@ -43,7 +43,13 @@ async function loadPaypalFromCloud(){
   }catch(e){ console.log('load paypal cloud',e); }
 }
 document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromCloud,500); });
-</script></head><body>
+</script><style>
+.novita-wrap{overflow:hidden;position:relative}
+.novita-track{display:flex;gap:14px;width:max-content;animation:reboxScroll 28s linear infinite}
+.novita-track:hover{animation-play-state:paused}
+.novita-track .card{width:260px;flex:0 0 260px}
+@keyframes reboxScroll{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+</style></head><body>
 
 <div id="accountBar" style="background:#00A88F;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:700">
 <span id="accountStatus">👤 Non sei registrato - Per fare un'offerta all'asta devi registrarti</span>
@@ -72,13 +78,13 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <h1>Il Natale che <em>non ti fa fare la coda</em></h1>
 <p>Pacchi misteriosi da resi e stock. Aste 3,2,1 online. Paghi con PayPal, scegli il corriere.</p>
 <p><b>Loro ti fanno fare la coda. Noi ti facciamo restare a casa.</b></p>
-<div class="searchbar"><input id="q" placeholder="Cerca trapano, pentole, cuffie, lego..."><button onclick="searchProd()">Cerca</button></div>
+<div class="searchbar"><input id="q" placeholder="Cerca un prodotto..."><button onclick="searchProd()">Cerca</button></div>
 <a class="btn" href="#pacchi">Trova il regalo perfetto</a><a class="btn btn2" href="#aste">Vedi le aste di Natale</a>
 <p style="font-size:13px">Pezzi e valore solo di riferimento. Contenuto esatto non conoscibile prima dell'apertura.</p></div>
 <div class="wrap">
 <div class="promo">🎁 NATALE REBOX: Pacco Piccolo 19€ • Medio 39€ • Grande 79€ — Il regalo perfetto senza stress | 🔥 Ultimi pezzi in molte categorie</div>
 <section id="negozio"><h2>🛒 Negozio al dettaglio - I tuoi prodotti</h2>
-<p><b>Nessun prodotto esempio.</b> Ora il negozio è vuoto e pulito. Aggiungi i tuoi prodotti veri da <b>Admin > Gestione Prodotti</b> e appariranno qui da soli.</p>
+
 <div class="catbar" id="catBar"></div>
 <div id="shopGrid"></div>
 <div id="searchRes" style="margin-top:16px"></div>
@@ -92,7 +98,7 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 </div></section>
 <section id="aste"><h2>🔥 Aste 3,2,1 Online</h2><p><b>3 • 2 • 1 • da casa tua!</b> Guarda il teaser YouTube, fai la tua offerta, vinci senza coda sotto il sole, sotto l'acqua, al freddo e al gelo.</p>
 <div id="auctionsGrid"></div>
-<p style="font-size:13px">Come funziona: clicchi <b>Fai un'offerta +5€</b> → la tua offerta sale subito → la vedi nella lista Ultime 3 offerte → se sei il più alto quando il timer arriva a 0, vinci tu e paghi con PayPal.</p></section>
+</section>
 <section id="resi"><h2>↩️ Resi e Rimborsi</h2><p><b>Reso facile: 14 giorni se il pacco è ancora sigillato. Se lo apri, hai accettato la sorpresa. Se qualcosa è rotto o manca, ti rimborsiamo noi.</b></p>
 <ul><li><b>Prodotto al dettaglio:</b> 14 giorni, prodotto integro, rimborso PayPal entro 14 giorni dal rientro.</li><li><b>Pacco sigillato:</b> reso entro 14 giorni se non aperto.</li><li><b>Pacco aperto / Asta vinta:</b> NO reso per ripensamento. Sì rimborso se rotto, pericoloso o pezzi mancanti.</li></ul>
 <h3>Richiedi reso</h3><input placeholder="Numero ordine"><input placeholder="Email"><select><option>Ripensamento pacco sigillato</option><option>Prodotto rotto</option><option>Prodotto sbagliato</option><option>Pezzi mancanti</option></select><label><input type="checkbox" style="width:auto"> Confermo pacco ancora sigillato</label><button onclick="alert('Richiesta reso inviata. Ti mandiamo codice reso e indirizzo.')">Invia richiesta reso</button></section>
@@ -189,7 +195,7 @@ async function loadProductsFromCloud(){
     let j=await r.json();
     if(j&&j[0]&&Array.isArray(j[0].value)){
       adminProducts=j[0].value;
-      localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
+      localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts));
       if(typeof renderAdminList==='function') renderAdminList();
       if(typeof renderNewProducts==='function') renderNewProducts();
       if(typeof renderShop==='function') renderShop();
@@ -197,11 +203,103 @@ async function loadProductsFromCloud(){
   }catch(e){ console.log('load prodotti cloud',e); }
 }
 document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadProductsFromCloud,800); });
+// Sync automatico ogni 20s da Supabase - PC, telefono e clienti vedono sempre gli stessi dati
+var syncSupabaseInterval = setInterval(function(){ if(typeof loadProductsFromCloud==='function' && !window._editingProduct) loadProductsFromCloud(); }, 20000);
+
+
+function enforceNovitaLimit(){
+  let news=adminProducts.map((p,i)=>({p,i})).filter(x=>x.p.isNew && !x.p.blocked).sort((a,b)=>(a.p.newAt||0)-(b.p.newAt||0));
+  while(news.length>10){
+    let oldest=news.shift();
+    adminProducts[oldest.i].isNew=false;
+  }
+}
+function toggleNovita(i){
+  if(!adminProducts[i].isNew){
+    adminProducts[i].isNew=true; adminProducts[i].newAt=Date.now();
+    enforceNovitaLimit();
+    localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
+    renderAdminList(); renderNewProducts();
+    let count=adminProducts.filter(p=>p.isNew && !p.blocked).length;
+    let m=document.getElementById('adminMsg'); if(m) m.textContent='✨ '+adminProducts[i].name+' messo in NOVITÀ! Ora scorre in home. Novità attive: '+count+'/10';
+  } else {
+    adminProducts[i].isNew=false;
+    localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
+    renderAdminList(); renderNewProducts();
+  }
+}
+function openProductDetail(name){
+  var p = null;
+  for (var i=0;i<adminProducts.length;i++){ if(adminProducts[i].name===name){ p=adminProducts[i]; break; } }
+  if(!p) return;
+  var m=document.getElementById('productModal'); if(!m) return;
+  var c=document.getElementById('productModalContent');
+  var saved = parseFloat(p.old||0) - parseFloat(p.price||0);
+  var stockTxt = p.stock==0 ? 'ESAURITO' : p.stock + ' pezzi disponibili';
+  var photoHtml = p.photo ? '<img src="'+p.photo+'" style="width:100%;height:280px;object-fit:cover">' : '<div style="height:180px;background:#FFF3E6;display:flex;align-items:center;justify-content:center;font-size:60px">📦</div>';
+  var badge = p.isNew ? 'NOVITA - ' : '';
+  var buyHtml = '';
+  if(p.stock==0){
+    buyHtml = '<div style="background:#ddd;padding:12px;border-radius:10px;text-align:center;font-weight:900;margin:12px 0">ESAURITO - Non puoi comprarlo</div>';
+  } else {
+    buyHtml = '<div style="display:flex;gap:8px;align-items:center;justify-content:center;margin:14px 0">Quantita: <button onclick="changeQty(\'qty-detail\',-1,'+p.stock+')" style="width:36px;height:36px">-</button> <input id="qty-detail" type="number" min="1" max="'+p.stock+'" value="1" style="width:70px;padding:8px;text-align:center;border:1px solid #ddd;border-radius:10px"> <button onclick="changeQty(\'qty-detail\',1,'+p.stock+')" style="width:36px;height:36px">+</button></div><button onclick="buyByName(\''+p.name.replace(/'/g,"\\'")+'\','+p.price+')" style="width:100%;padding:14px;font-size:16px">Aggiungi al carrello - '+p.price+' euro</button>';
+  }
+  var descHtml = '';
+  if(p.desc){ descHtml = '<h3 style="margin:18px 0 8px;border-top:1px solid #eee;padding-top:14px">Descrizione</h3><p style="white-space:pre-line;line-height:1.6;color:#333">' + p.desc.replace(/</g,'&lt;') + '</p>'; }
+  var specsHtml = '';
+  if(p.specs){
+    var rows = p.specs.split('\n').filter(function(r){ return r.trim()!==''; }).map(function(r){
+      var idx=r.indexOf(':'); if(idx===-1) return '<tr><td colspan="2" style="padding:8px;border-bottom:1px solid #eee">'+r.replace(/</g,'&lt;')+'</td></tr>';
+      return '<tr><td style="padding:8px;border-bottom:1px solid #eee;font-weight:800;width:40%">'+r.slice(0,idx).replace(/</g,'&lt;')+'</td><td style="padding:8px;border-bottom:1px solid #eee">'+r.slice(idx+1).trim().replace(/</g,'&lt;')+'</td></tr>';
+    }).join('');
+    specsHtml = '<button onclick="openSpecsPopup()" style="width:100%;margin:18px 0 8px;padding:12px;background:#111;color:#fff;border:none;border-radius:10px;font-weight:800">Vedi scheda tecnica</button>'
+  }
+  c.innerHTML = '<div>'+photoHtml+'</div><div style="padding:18px"><span style="background:#FF5722;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:900">'+badge+p.cat+'</span><h2 style="margin:10px 0 6px">'+p.name+'</h2><div><span class="old">'+p.old+' euro</span> <span class="price" style="font-size:28px">'+p.price+' euro</span></div><p style="margin:10px 0">Risparmi <b>'+saved.toFixed(2)+' euro</b> rispetto agli altri e-commerce.</p><p>Disponibilita: <b>'+stockTxt+'</b></p><p style="font-size:13px;color:#555">Prodotto da reso stock - verificato da REBOX. Se arriva rotto, pericoloso o con pezzi mancanti rispetto a quanto promesso, hai diritto a rimborso o sostituzione. 14 giorni per il reso se sigillato.</p>'+descHtml+specsHtml+buyHtml+'<p style="text-align:center;font-size:13px;margin-top:10px">Spedizione con corriere a scelta. Gratis sopra 59 euro.</p></div>';
+  m.style.display='flex';
+}
+function openSpecsPopup(){
+  var p = window._currentProduct; if(!p || !p.specs) return;
+  var m=document.getElementById('specsModal'); if(!m) return;
+  var c=document.getElementById('specsModalContent');
+  var rows = p.specs.split('\n').filter(function(r){return r.trim()!=='';}).map(function(r){
+    var idx=r.indexOf(':'); if(idx===-1) return '<tr><td colspan="2" style="padding:9px;border-bottom:1px solid #eee">'+r.replace(/</g,'&lt;')+'</td></tr>';
+    return '<tr><td style="padding:9px;border-bottom:1px solid #eee;font-weight:800;width:40%">'+r.slice(0,idx).replace(/</g,'&lt;')+'</td><td style="padding:9px;border-bottom:1px solid #eee">'+r.slice(idx+1).trim().replace(/</g,'&lt;')+'</td></tr>';
+  }).join('');
+  c.innerHTML='<h2 style="margin:0 30px 6px 0">Scheda tecnica</h2><p style="color:#555;margin:0 0 14px">'+p.name.replace(/</g,'&lt;')+'</p><table style="width:100%;border-collapse:collapse;font-size:14px">'+rows+'</table><button onclick="closeSpecsPopup()" style="width:100%;margin-top:16px;padding:12px">Chiudi</button>';
+  m.style.display='flex';
+}
+function closeSpecsPopup(){ var m=document.getElementById('specsModal'); if(m) m.style.display='none'; }
+document.addEventListener('keydown', function(e){ if(e.key==='Escape'){ closeSpecsPopup(); } });
+
+function buyByName(n,pr){ var q=document.getElementById('qty-detail'); var qty=q?q.value:1; buy(n,pr,qty); closeProductModal(); }
+function closeProductModal(){ var m=document.getElementById('productModal'); if(m) m.style.display='none'; }
+
+
+// Clic su una card prodotto = apre la scheda di quel prodotto (se clicchi bottone o quantità non apre)
+document.addEventListener('click', function(e){
+  if(e.target.closest('button') || e.target.closest('input') || e.target.closest('#productModal')) return;
+  var card=e.target.closest('.card'); if(!card) return;
+  var h=card.querySelector('h3'); if(!h) return;
+  var nm=h.textContent.trim(); if(!nm) return;
+  if(nm.indexOf('Pacco')===0) return;
+  openProductDetail(nm);
+});
+
+function productCardHTML(p,idx){
+  return `<div class="card" style="cursor:pointer">${p.isNew?'<span style="background:#FF5722;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:900">✨ NOVITÀ</span> ':''}${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`;
+}
+function searchProd(){
+  let q=(document.getElementById('q')?.value||'').toLowerCase().trim();
+  let grid=document.getElementById('shopGrid'); if(!grid) return;
+  let vis=adminProducts.filter(p=>!p.blocked && (!q || p.name.toLowerCase().includes(q) || p.cat.toLowerCase().includes(q)));
+  if(vis.length===0){ grid.innerHTML='<p style="background:#fff;padding:14px;border-radius:12px;text-align:center">Nessun prodotto trovato per "'+q+'". Prova un altra parola o scegli una categoria.</p>'; return; }
+  grid.innerHTML='<h3>🔎 Risultati per "'+(q||'tutti')+'" - '+vis.length+' articoli</h3><div class="grid">'+vis.map((p,idx)=>productCardHTML(p,idx)).join('')+'</div>';
+}
 function renderAdminList(){
   let el=document.getElementById('adminProductList');
   if(!el) return;
-  if(adminProducts.length===0){ el.innerHTML='<p>Nessun prodotto aggiunto da Admin ancora. Nessun prodotto esempio. Solo i tuoi prodotti veri. Aggiungi il primo qui sopra.</p>'; return; }
-  el.innerHTML = adminProducts.map((p,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span>${p.photo?`<img src="${p.photo}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:6px">`:''}<b>${p.name}</b> - ${p.cat} - ${p.price}€ - Stock ${p.stock} - ${p.blocked?'🔴 BLOCCATO':'🟢 Visibile'}</span><span><button onclick="toggleBlock(${i})">${p.blocked?'Sblocca':'Blocca'}</button> <button onclick="deleteProduct(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span></div>`).join('');
+  if(adminProducts.length===0){ el.innerHTML='<p>Nessun prodotto al momento.</p>'; return; }
+  el.innerHTML = adminProducts.map((p,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span>${p.photo?`<img src="${p.photo}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:6px">`:''}<b>${p.name}</b> - ${p.cat} - ${p.price}€ - Stock ${p.stock} - ${p.blocked?'🔴 BLOCCATO':'🟢 Visibile'}</span><span><button onclick="toggleBlock(${i})">${p.blocked?'Sblocca':'Blocca'}</button> <button onclick="editProduct(${i})" style="background:#FF9800;color:#fff">Modifica</button> <button onclick="deleteProduct(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span></div>`).join('');
 }
 function addProduct(){
   let cat=document.getElementById('newCat').value;
@@ -210,10 +308,28 @@ function addProduct(){
   let price=document.getElementById('newPrice').value;
   let stock=document.getElementById('newStock').value;
   if(!name||!price){ alert('Metti almeno Nome e Prezzo REBOX'); return; }
-  adminProducts.push({cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||''}); tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
+  let isNew=document.getElementById('newIsNew')?.checked||false; if(window._editingProduct!==undefined && window._editingProduct!==null){ var _i=window._editingProduct; var _oldIsNew=adminProducts[_i].isNew; var _oldAt=adminProducts[_i].newAt; adminProducts[_i]={cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:adminProducts[_i].blocked,photo:adminProducts[_i].photo||tempProductPhoto||'',desc:document.getElementById('newDesc')?.value.trim()||'',specs:document.getElementById('newSpecs')?.value.trim()||'',isNew:document.getElementById('newIsNew')?.checked||false,newAt:document.getElementById('newIsNew')?.checked?( _oldIsNew?_oldAt:Date.now()):0}; if(adminProducts[_i].isNew) enforceNovitaLimit(); window._editingProduct=null; var _b=document.querySelector('button[onclick="addProduct()"]'); if(_b) _b.textContent='Aggiungi prodotto al negozio'; localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); document.getElementById('addMsg').textContent='Modifiche salvate!'; document.getElementById('newName').value=''; var _dd=document.getElementById('newDesc'); if(_dd) _dd.value=''; var _ss=document.getElementById('newSpecs'); if(_ss) _ss.value=''; renderAdminList(); renderNewProducts(); return; } var _desc=document.getElementById('newDesc')?.value.trim()||''; var _specs=document.getElementById('newSpecs')?.value.trim()||''; adminProducts.push({cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||'',desc:_desc,specs:_specs,isNew:isNew,newAt:isNew?Date.now():0}); if(isNew) enforceNovitaLimit(); tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
   localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
   document.getElementById('addMsg').textContent='✅ '+name+' aggiunto in '+cat+'! Ora è visibile nel negozio.';
-  document.getElementById('newName').value=''; renderAdminList(); renderNewProducts();
+  document.getElementById('newName').value=''; var _d=document.getElementById('newDesc'); if(_d) _d.value=''; var _s=document.getElementById('newSpecs'); if(_s) _s.value=''; renderAdminList(); renderNewProducts();
+}
+
+function editProduct(i){
+  var p=adminProducts[i]; if(!p) return;
+  var el=function(id){return document.getElementById(id)};
+  if(el('newCat')) el('newCat').value=p.cat||'Casa & Arredo';
+  if(el('newName')) el('newName').value=p.name||'';
+  if(el('newOld')) el('newOld').value=p.old||'';
+  if(el('newPrice')) el('newPrice').value=p.price||'';
+  if(el('newStock')) el('newStock').value=p.stock||0;
+  if(el('newDesc')) el('newDesc').value=p.desc||'';
+  if(el('newSpecs')) el('newSpecs').value=p.specs||'';
+  if(el('newIsNew')) el('newIsNew').checked=!!p.isNew;
+  window._editingProduct=i;
+  if(el('addMsg')) el('addMsg').textContent='Stai modificando: '+p.name+' - correggi e clicca Salva modifiche.';
+  var btn=document.querySelector('button[onclick="addProduct()"]'); if(btn) btn.textContent='Salva modifiche';
+  window.scrollTo({top:0,behavior:'smooth'});
+  var sec=document.getElementById('newName'); if(sec) sec.focus();
 }
 function deleteProduct(i){
   if(!confirm('Sei sicuro? Elimini '+adminProducts[i].name+' per sempre.')) return;
@@ -237,7 +353,7 @@ function renderNewProducts(){
   if(!box) return;
   let vis=adminProducts.filter(p=>!p.blocked);
   if(vis.length===0) return;
-  box.innerHTML='<h3>✨ Nuovi prodotti aggiunti da Admin</h3><div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}<br><small>Da Admin puoi Bloccare / Eliminare</small></div>`).join('')+'</div>';
+  box.innerHTML='<h3>✨ Novità</h3><div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
 }
 // Mostra lista appena entri in Admin
 
@@ -297,22 +413,28 @@ function renderShop(){
   let bar=document.getElementById('catBar');
   if(!grid) return;
   let vis=adminProducts.filter(p=>!p.blocked);
-  if(vis.length===0){
-    grid.innerHTML='<div style="background:#FFF3E6;padding:20px;border-radius:14px;text-align:center"><h3>Negozio vuoto</h3><p>Aggiungi il tuo primo prodotto da Admin > Gestione Prodotti.</p><p>Esempio: Nome: Trapano avvitatore | Prezzo vecchio: 89 | Prezzo REBOX: 29 | Stock: 10</p></div>';
-    if(bar) bar.innerHTML='';
+  let cats=[...new Set(vis.map(p=>p.cat))];
+  if(bar) bar.innerHTML=cats.map(c=>`<button onclick="filterCat('${c}')">${c}</button>`).join('')+' <button onclick="showAllProducts()">Tutte</button>';
+  let news=vis.filter(p=>p.isNew);
+  if(news.length===0){
+    grid.innerHTML='<div style="background:#FFF3E6;padding:20px;border-radius:14px;text-align:center"><h3>✨ NOVITÀ</h3><p>Ancora nessuna novità.</p><p>Usa la ricerca o scegli una categoria.</p></div>';
     return;
   }
-  let cats=[...new Set(vis.map(p=>p.cat))];
-  if(bar) bar.innerHTML=cats.map(c=>`<button onclick="filterCat('${c}')">${c}</button>`).join('')+' <button onclick="renderShop()">Tutte</button>';
-  grid.innerHTML='<div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
+  let cards=news.map((p,idx)=>productCardHTML(p,idx)).join('');
+  grid.innerHTML='<h3>✨ NOVITÀ - Scorrono in home</h3><div class="novita-wrap"><div class="novita-track">'+cards+cards+'</div></div><p style="text-align:center;font-size:13px"></p>';
+}
+function showAllProducts(){
+  let grid=document.getElementById('shopGrid'); if(!grid) return;
+  let vis=adminProducts.filter(p=>!p.blocked);
+  grid.innerHTML='<h3>🛍️ Tutti gli articoli - '+vis.length+'</h3><div class="grid">'+vis.map((p,idx)=>productCardHTML(p,idx)).join('')+'</div>';
 }
 function filterCat(c){
   let grid=document.getElementById('shopGrid');
   let vis=adminProducts.filter(p=>!p.blocked && p.cat===c);
-  grid.innerHTML='<h3>'+c+'</h3><div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
+  grid.innerHTML='<h3>'+c+' - '+vis.length+' articoli</h3><div class="grid">'+vis.map((p,idx)=>productCardHTML(p,idx)).join('')+'</div>';
 }
 let _oldRenderNew = renderNewProducts;
-renderNewProducts = function(){ renderShop(); renderAdminList(); };
+renderNewProducts = function(){ renderShop(); if(typeof renderAdminList==='function') renderAdminList(); };
 document.addEventListener('DOMContentLoaded', ()=>{ renderShop(); });
 
 /* cartItems definito con var sopra */
@@ -695,4 +817,4 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
 <span style="display:flex;gap:8px"><button onclick="scrollToCheckout()" style="background:#071A33;color:#fff;padding:12px 18px">VAI A PAGARE →</button><button onclick="clearCart()" style="background:#fff;color:#071A33;padding:12px 14px">Svuota</button></span>
 </div>
 <div style="height:70px"></div>
-</body></html>
+<div id="productModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:center;padding:12px" onclick="if(event.target.id==='productModal') closeProductModal()"><div style="background:#fff;max-width:520px;width:100%;border-radius:18px;overflow:hidden;max-height:92vh;overflow-y:auto;position:relative"><button onclick="closeProductModal()" style="position:absolute;top:10px;right:10px;z-index:2;background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px">X</button><div id="productModalContent"></div></div></div><div id="specsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;justify-content:center;align-items:center;padding:12px" onclick="if(event.target.id==='specsModal') closeSpecsPopup()"><div style="background:#fff;max-width:480px;width:100%;border-radius:18px;max-height:88vh;overflow-y:auto;position:relative"><button onclick="closeSpecsPopup()" style="position:absolute;top:10px;right:10px;background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer">X</button><div id="specsModalContent" style="padding:22px"></div></div></div></body></html>
