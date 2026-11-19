@@ -109,11 +109,40 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 <h4>Lista Prodotti - Elimina / Blocca / Sblocca</h4>
 <div id="adminProductList" style="background:#fff;padding:12px;border-radius:12px"></div>
 <p style="font-size:13px"><b>Elimina</b> = sparisce per sempre. <b>Blocca</b> = resta salvato ma non si vede nel negozio, lo puoi sbloccare quando vuoi. <b>Stock 0</b> = in automatico diventa ESAURITO.</p>
+
+<h3>🔔 Notifiche Ordini - Qui vedi chi ha comprato</h3>
+<p><b>Come ti arriva l'avviso:</b><br>
+1. <b>PayPal ti manda subito un'email</b> quando qualcuno paga - è automatico, devi solo controllare la mail del tuo PayPal.<br>
+2. <b>Ordine salvato in Supabase</b> - se hai collegato Supabase in Admin, l'ordine va lì e lo vedi qui sotto.<br>
+3. <b>Ordine salvato anche in questo browser</b> - per prova.</p>
+<button onclick="loadOrders()">🔄 Aggiorna lista ordini</button>
+<div id="ordersList" style="background:#fff;padding:12px;border-radius:12px;margin-top:10px">Nessun ordine ancora. Quando qualcuno paga, apparirà qui.</div>
+<p style="font-size:13px">Per ricevere anche un'email da Supabase: Supabase > Authentication > Email Templates, oppure collega Resend / Netlify Forms. PayPal da solo già ti avvisa.</p>
 <h3>Stock per categoria</h3><table><tr><th>Categoria</th><th>Prodotti</th><th>Stato</th></tr><tr><td>Casa & Arredo</td><td>6</td><td>Disponibile</td></tr><tr><td>Cucina</td><td>6</td><td>Disponibile</td></tr><tr><td>Fai-da-te</td><td>6</td><td>Ultimi pezzi</td></tr><tr><td>Elettronica</td><td>6</td><td>Disponibile</td></tr><tr><td>Giardino</td><td>6</td><td>Disponibile</td></tr><tr><td>Bambini</td><td>6</td><td>Disponibile</td></tr><tr><td>Bellezza</td><td>6</td><td>Disponibile</td></tr><tr><td>Sport</td><td>6</td><td>Disponibile</td></tr></table></div></section>
 </div><footer>REBOX • Resi • Stock • Casa • © 2026 • Termini • Privacy • Resi e Rimborsi • Contenuto non verificato singolarmente, marca/modello non garantiti.</footer>
 <script>
+// === CARRELLO UNICO - UNA SOLA FUNZIONE BUY ===
+var cartItems = JSON.parse(localStorage.getItem('reboxCart')||'[]');
+function saveCart(){ try{ localStorage.setItem('reboxCart', JSON.stringify(cartItems)); }catch(e){} }
+function cartTotal(){ let s=0; for(let i=0;i<cartItems.length;i++){ s+=parseFloat(cartItems[i].price||0); } return s; }
+function buy(n,p){
+  try{
+    if(!n) n='Prodotto';
+    let price = parseFloat(p);
+    if(isNaN(price)) price=0;
+    cartItems.push({name:String(n), price:price});
+    saveCart();
+    if(typeof updateCartUI==='function') updateCartUI();
+    if(typeof forceShowCart==='function') forceShowCart();
+    // Aggiorna anche barra direttamente se updateCartUI non c'è
+    let bt=document.getElementById('cartBarText'); if(bt) bt.textContent = cartItems.map(x=>x.name).join(', ');
+    let btot=document.getElementById('cartBarTotal'); if(btot) btot.textContent = cartTotal().toFixed(2)+'€';
+    alert(n+' aggiunto! Totale ora: '+cartTotal().toFixed(2)+'€');
+  }catch(e){ alert('Errore carrello: '+e.message); console.log(e); }
+}
+
 let cart=[],total=0,curBid=45;
-function buy(n,p){cart.push(n);total+=p;document.getElementById('cart').textContent=cart.join(', ');document.getElementById('total').textContent=total+'€';document.getElementById('shipInfo').textContent=total>=59?'Spedizione GRATIS sbloccata!':'Mancano '+(59-total)+'€ per spedizione gratis';alert(n+' aggiunto');}
+/* buy vecchio rimosso - usa quello nuovo sotto */
 function bid(){curBid+=5;document.getElementById('bid').textContent=curBid+'€';}
 function showCat(i){document.querySelectorAll('.catsec').forEach((e,idx)=>e.style.display=idx===i?'block':'none');}
 function searchProd(){let q=document.getElementById('q').value.toLowerCase();document.getElementById('searchRes').innerHTML=q?'<b>Risultati per "'+q+'":</b> Scorri le categorie - i prodotti con "'+q+'" sono evidenziati. Usa il menu categorie per trovarli.':'';}
@@ -206,14 +235,10 @@ let _oldRenderNew = renderNewProducts;
 renderNewProducts = function(){ renderShop(); renderAdminList(); };
 document.addEventListener('DOMContentLoaded', ()=>{ renderShop(); });
 
-let cartItems = JSON.parse(localStorage.getItem('reboxCart')||'[]');
+/* cartItems definito con var sopra */
 function saveCart(){ localStorage.setItem('reboxCart', JSON.stringify(cartItems)); }
 function cartTotal(){ return cartItems.reduce((s,x)=>s+x.price,0); }
-function buy(n,p){
-  cartItems.push({name:n, price:parseFloat(p)});
-  saveCart(); updateCartUI();
-  alert(n+' aggiunto! Totale ora: '+cartTotal().toFixed(2)+'€ - Lo vedi in alto nella barra arancione e in Checkout.');
-}
+
 function clearCart(){ cartItems=[]; saveCart(); updateCartUI(); }
 function removeItem(i){ cartItems.splice(i,1); saveCart(); updateCartUI(); }
 function scrollToCheckout(){ document.getElementById('checkout').scrollIntoView({behavior:'smooth'}); }
@@ -322,7 +347,7 @@ function renderPayPalButtons(finalTotal){
           // Salva ordine
           let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');
           orders.push({id:details.id, items:cartItems, total:finalTotal, name:document.getElementById('custName').value, addr:document.getElementById('custAddr').value, date:new Date().toLocaleString('it-IT')});
-          localStorage.setItem('reboxOrders', JSON.stringify(orders));
+          localStorage.setItem('reboxOrders', JSON.stringify(orders)); sendOrderToSupabase({id:details.id, items:cartItems, total:finalTotal, name:document.getElementById('custName').value, addr:document.getElementById('custAddr').value, email:document.getElementById('custEmail')?document.getElementById('custEmail').value:''});
           cartItems=[]; saveCart(); updateCartUI();
           alert('Pagamento riuscito! Ordine confermato. ID: '+details.id);
         });
@@ -334,7 +359,7 @@ function renderPayPalButtons(finalTotal){
 function renderPayPal(){ loadPayPalSDK(); }
 
 // FIX CARRELLO SEMPRE VISIBILE - se cartItems non esiste, crealo
-if(typeof cartItems==='undefined'){ var cartItems = JSON.parse(localStorage.getItem('reboxCart')||'[]'); }
+if(typeof cartItems==='undefined'){ /* cartItems già definito sopra */ }
 function forceShowCart(){
   let bar=document.getElementById('cartBar'); if(bar) bar.style.display='flex';
   if(typeof updateCartUI==='function') updateCartUI();
@@ -346,6 +371,29 @@ function forceShowCart(){
 }
 document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(forceShowCart,300); setTimeout(forceShowCart,1000); });
 window.addEventListener('load', forceShowCart);
+
+async function sendOrderToSupabase(order){
+  try{
+    let url = localStorage.getItem('sbUrl')||'';
+    let key = localStorage.getItem('sbKey')||'';
+    if(!url||!key) return false;
+    let res = await fetch(url.replace(/\/$/,'')+'/rest/v1/orders', {
+      method:'POST',
+      headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'return=minimal'},
+      body: JSON.stringify({items:order.items, total:order.total, customer_name:order.name, customer_email:order.email||'', customer_address:order.addr||'', paypal_id:order.id, status:'pagato'})
+    });
+    return res.ok;
+  }catch(e){ console.log('Supabase ordine errore',e); return false; }
+}
+function loadOrders(){
+  let el=document.getElementById('ordersList');
+  if(!el) return;
+  let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');
+  if(orders.length===0){ el.innerHTML='Nessun ordine ancora in questo browser. Controlla anche la tua email PayPal e Supabase > Table Editor > orders.'; return; }
+  el.innerHTML = orders.map(o=>`<div style="border-bottom:1px solid #eee;padding:10px 0"><b>Ordine ${o.id}</b> - ${o.date}<br>${o.items.map(i=>i.name).join(', ')} - Totale: <b>${o.total}€</b><br>Cliente: ${o.name} - ${o.addr}</div>`).join('') + '<p><b>Totale ordini in questo browser: '+orders.length+'</b></p>';
+}
+// Quando un ordine va a buon fine, salva anche su Supabase
+let _origPayFake = null;
 </script>
 <div id="cartBar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#FF7A00;color:#071A33;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:900;box-shadow:0 -4px 20px rgba(0,0,0,.4);font-size:16px">
 <span>🛒 <span id="cartBarText">Carrello vuoto</span> • Totale: <span id="cartBarTotal" style="font-size:20px">0€</span></span>
