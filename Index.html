@@ -72,9 +72,9 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 </section>
 <section id="pacchi"><h2>📦 Pacchi Misteriosi REBOX</h2><p><b>Numero pezzi variabile in base alla dimensione degli oggetti contenuti. I pezzi indicati sono solo di riferimento.</b><br>Se dentro ci sono oggetti grandi, i pezzi saranno di meno. Se ci sono oggetti piccoli, i pezzi saranno di più.<br><b>Valore stimato solo di riferimento. Il valore reale e il contenuto esatto non sono conoscibili prima dell'apertura. </b></p>
 <div class="grid">
-<div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-piccolo.webp" alt="Pacco Piccolo REBOX"><span class="box-badge">🎁 PICCOLO</span><span class="box-badge2">-68%</span></div><h3>Pacco PICCOLO</h3><div class="price">19€</div><p><b>Fino a 15 pezzi</b></p><p>Valore stimato: 60€+</p><p>Disponibili: <b id="stockPiccolo">48</b></p><button id="btnPiccolo" onclick="buy('Pacco Piccolo',19)">Acquista alla cieca</button><div id="esauritoPiccolo" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
-<div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-medio.webp" alt="Pacco Medio REBOX"><span class="box-badge">🎁 MEDIO • PIÙ SCELTO</span><span class="box-badge2">-67%</span></div><h3>Pacco MEDIO</h3><div class="price">39€</div><p><b>Da 16 a 30 pezzi</b></p><p>Valore stimato: 120€+</p><p>Disponibili: <b id="stockMedio">42</b></p><button id="btnMedio" onclick="buy('Pacco Medio',39)">Acquista alla cieca</button><div id="esauritoMedio" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
-<div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-grande.webp" alt="Pacco Grande REBOX"><span class="box-badge">🎁 GRANDE • MAX VALORE</span><span class="box-badge2">-68%</span></div><h3>Pacco GRANDE</h3><div class="price">79€</div><p><b>Oltre 30 pezzi</b></p><p>Valore stimato: 250€+</p><p>Disponibili: <b id="stockGrande">28</b></p><button id="btnGrande" onclick="buy('Pacco Grande',79)">Acquista alla cieca</button><div id="esauritoGrande" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
+<div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-piccolo.webp" alt="Pacco Piccolo REBOX"><span class="box-badge">🎁 PICCOLO</span><span class="box-badge2">-68%</span></div><h3>Pacco PICCOLO</h3><div class="price">19€</div><p><b>Fino a 15 pezzi</b></p><p>Valore stimato: 60€+</p><p>Disponibili: <b id="stockPiccolo">48</b></p><div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty('qty-box-piccolo',-1,99)" style="width:32px">-</button> <input id="qty-box-piccolo" type="number" min="1" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty('qty-box-piccolo',1,99)" style="width:32px">+</button></div><button id="btnPiccolo" onclick="buy('Pacco Piccolo',19,document.getElementById('qty-box-piccolo').value)">Acquista alla cieca</button><div id="esauritoPiccolo" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
+<div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-medio.webp" alt="Pacco Medio REBOX"><span class="box-badge">🎁 MEDIO • PIÙ SCELTO</span><span class="box-badge2">-67%</span></div><h3>Pacco MEDIO</h3><div class="price">39€</div><p><b>Da 16 a 30 pezzi</b></p><p>Valore stimato: 120€+</p><p>Disponibili: <b id="stockMedio">42</b></p><div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty('qty-box-medio',-1,99)" style="width:32px">-</button> <input id="qty-box-medio" type="number" min="1" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty('qty-box-medio',1,99)" style="width:32px">+</button></div><button id="btnMedio" onclick="buy('Pacco Medio',39,document.getElementById('qty-box-medio').value)">Acquista alla cieca</button><div id="esauritoMedio" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
+<div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-grande.webp" alt="Pacco Grande REBOX"><span class="box-badge">🎁 GRANDE • MAX VALORE</span><span class="box-badge2">-68%</span></div><h3>Pacco GRANDE</h3><div class="price">79€</div><p><b>Oltre 30 pezzi</b></p><p>Valore stimato: 250€+</p><p>Disponibili: <b id="stockGrande">28</b></p><div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty('qty-box-grande',-1,99)" style="width:32px">-</button> <input id="qty-box-grande" type="number" min="1" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty('qty-box-grande',1,99)" style="width:32px">+</button></div><button id="btnGrande" onclick="buy('Pacco Grande',79,document.getElementById('qty-box-grande').value)">Acquista alla cieca</button><div id="esauritoGrande" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
 </div></section>
 <section id="aste"><h2>🔥 Aste 3,2,1 Online</h2><p><b>3 • 2 • 1 • da casa tua!</b> Guarda il teaser YouTube, fai la tua offerta, vinci senza coda sotto il sole, sotto l'acqua, al freddo e al gelo.</p>
 <div id="auctionsGrid"></div>
@@ -117,7 +117,8 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 var cartItems = JSON.parse(localStorage.getItem('reboxCart')||'[]');
 function saveCart(){ try{ localStorage.setItem('reboxCart', JSON.stringify(cartItems)); }catch(e){} }
 function cartTotal(){ let s=0; for(let i=0;i<cartItems.length;i++){ s+=parseFloat(cartItems[i].price||0); } return s; }
-function buy(n,p){
+function changeQty(id,delta,max){ let el=document.getElementById(id); if(!el) return; let v=parseInt(el.value)||1; v+=delta; if(v<1) v=1; if(max&&v>max) v=max; el.value=v; }
+function buy(n,p,qty){ let q=parseInt(qty)||1; if(q<1) q=1;
   // BLOCCO SE PACCO A 0
   if(String(n).includes('Pacco')){
     if(String(n).includes('Piccolo') && boxStocks.Piccolo<=0){ alert('Pacco Piccolo ESAURITO. Non puoi comprarlo.'); return; }
@@ -129,14 +130,24 @@ function buy(n,p){
     if(!n) n='Prodotto';
     let price = parseFloat(p);
     if(isNaN(price)) price=0;
-    cartItems.push({name:String(n), price:price}); if(String(n).includes('Pacco')){ try{ decrementBoxStock(String(n)); }catch(e){} }
+    // Controllo stock prodotti Admin: non far comprare più di quello che c'è
+    if(!String(n).includes('Pacco')){
+      let prod=adminProducts.find(x=>x.name===n);
+      if(prod && q>prod.stock){ alert('Disponibili solo '+prod.stock+' pezzi di '+n+'. Metti una quantità più bassa.'); return; }
+    }
+    // Se è un Pacco, controlla che ci siano abbastanza pacchi
+    if(String(n).includes('Pacco')){
+      let avail = String(n).includes('Piccolo')?boxStocks.Piccolo:String(n).includes('Medio')?boxStocks.Medio:boxStocks.Grande;
+      if(q>avail){ alert('Disponibili solo '+avail+' pacchi. Metti una quantità più bassa.'); return; }
+    }
+    for(let k=0;k<q;k++){ cartItems.push({name:String(n), price:price}); if(String(n).includes('Pacco')){ try{ decrementBoxStock(String(n)); }catch(e){} } }
     saveCart();
     if(typeof updateCartUI==='function') updateCartUI();
     if(typeof forceShowCart==='function') forceShowCart();
     // Aggiorna anche barra direttamente se updateCartUI non c'è
     let bt=document.getElementById('cartBarText'); if(bt) bt.textContent = cartItems.map(x=>x.name).join(', ');
     let btot=document.getElementById('cartBarTotal'); if(btot) btot.textContent = cartTotal().toFixed(2)+'€';
-    alert(n+' aggiunto! Totale ora: '+cartTotal().toFixed(2)+'€');
+    alert(q+' x '+n+' aggiunto! Totale ora: '+cartTotal().toFixed(2)+'€');
   }catch(e){ alert('Errore carrello: '+e.message); console.log(e); }
 }
 
@@ -212,7 +223,7 @@ function renderNewProducts(){
   if(!box) return;
   let vis=adminProducts.filter(p=>!p.blocked);
   if(vis.length===0) return;
-  box.innerHTML='<h3>✨ Nuovi prodotti aggiunti da Admin</h3><div class="grid">'+vis.map(p=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<button onclick="buy(\''+p.name+'\','+p.price+')">Aggiungi al carrello</button>'}<br><small>Da Admin puoi Bloccare / Eliminare</small></div>`).join('')+'</div>';
+  box.innerHTML='<h3>✨ Nuovi prodotti aggiunti da Admin</h3><div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}<br><small>Da Admin puoi Bloccare / Eliminare</small></div>`).join('')+'</div>';
 }
 // Mostra lista appena entri in Admin
 
@@ -279,12 +290,12 @@ function renderShop(){
   }
   let cats=[...new Set(vis.map(p=>p.cat))];
   if(bar) bar.innerHTML=cats.map(c=>`<button onclick="filterCat('${c}')">${c}</button>`).join('')+' <button onclick="renderShop()">Tutte</button>';
-  grid.innerHTML='<div class="grid">'+vis.map(p=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<button onclick="buy(\''+p.name+'\','+p.price+')">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
+  grid.innerHTML='<div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
 }
 function filterCat(c){
   let grid=document.getElementById('shopGrid');
   let vis=adminProducts.filter(p=>!p.blocked && p.cat===c);
-  grid.innerHTML='<h3>'+c+'</h3><div class="grid">'+vis.map(p=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<button onclick="buy(\''+p.name+'\','+p.price+')">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
+  grid.innerHTML='<h3>'+c+'</h3><div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
 }
 let _oldRenderNew = renderNewProducts;
 renderNewProducts = function(){ renderShop(); renderAdminList(); };
