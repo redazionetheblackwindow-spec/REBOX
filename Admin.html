@@ -29,7 +29,21 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 .box-card .box-badge2{position:absolute;top:12px;right:12px;background:#00A88F;color:#fff;padding:6px 12px;border-radius:999px;font-weight:900;font-size:13px}
 .box-price{font-size:32px!important;color:#FF7A00}
 </style>
-<script src="config.js"></script></head><body><div style="background:#111;color:#fff;padding:10px;text-align:center;font-weight:900">🔐 PAGINA ADMIN SEGRETA - NON CONDIVIDERE QUESTO LINK - <a href="index.html" style="color:#FF7A00">Torna al sito</a></div>
+<script src="config.js">
+// --- PayPal ONLINE: lo prende da config.js o da Supabase admin_config, non solo da questo PC ---
+async function loadPaypalFromCloud(){
+  try{
+    if(window.REBOX_PAYPAL_ID && !window.REBOX_PAYPAL_ID.includes('TUO-')){ localStorage.setItem('reboxPaypalId', window.REBOX_PAYPAL_ID); return; }
+    let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.includes('TUO-PROGETTO')) return;
+    let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.admin_config',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    let j=await r.json();
+    if(j&&j[0]&&j[0].value&&j[0].value.ppId){ localStorage.setItem('reboxPaypalId', j[0].value.ppId); }
+  }catch(e){ console.log('load paypal cloud',e); }
+}
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromCloud,500); });
+</script></head><body><div style="background:#111;color:#fff;padding:10px;text-align:center;font-weight:900">🔐 PAGINA ADMIN SEGRETA - NON CONDIVIDERE QUESTO LINK - <a href="index.html" style="color:#FF7A00">Torna al sito</a></div>
 
 <div id="accountBar" style="background:#00A88F;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:700">
 <span id="accountStatus">👤 Non sei registrato - Per fare un'offerta all'asta devi registrarti</span>
@@ -108,7 +122,7 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 <div id="paypal-button-container" style="margin-top:12px"></div>
 <p id="checkoutMsg" style="font-weight:800"></p>
 <p style="font-size:12px">PayPal usa il Client ID che hai salvato in Admin. Se hai messo il Client ID <b>LIVE</b>, qui sotto appare il bottone PayPal vero e gli utenti pagano davvero. Se hai messo quello <b>Sandbox</b>, pagano solo soldi finti di prova. Se hai messo il Client ID Live, qui paghi davvero.</p>
-<button onclick="payFake()" style="background:#071A33;color:#fff">Simula pagamento (se PayPal non è ancora collegato)</button>
+
 </div></section>
 <section id="admin" class="admin"><h2>🔐 Admin REBOX - Solo tu</h2>
 <div id="adminLock"><p>Questa area è solo per te. Inserisci la password Admin per entrare.</p><label>Password Admin</label><input type="password" id="adminPass" placeholder="Inserisci password Admin"><button id="btnEntraAdmin" onclick="unlockAdmin()" style="background:#FF7A00;color:#fff;font-size:18px;padding:14px 28px;border:none;border-radius:12px;cursor:pointer;width:100%;font-weight:900">🔓 ENTRA IN ADMIN</button><br><button onclick="let i=document.getElementById('adminPass'); i.type=i.type==='password'?'text':'password'" style="margin-top:8px;background:#eee;border:none;padding:8px 14px;border-radius:8px;cursor:pointer">👁 Mostra / Nascondi password</button><p id="adminLockMsg" style="color:red"></p></div>
@@ -235,11 +249,21 @@ async function loadProductsFromCloud(){
   }catch(e){ console.log('load prodotti cloud',e); }
 }
 document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadProductsFromCloud,800); });
+function updateProductStock(i){
+  let input=document.getElementById('stock-'+i);
+  if(!input) return;
+  let v=parseInt(input.value);
+  if(isNaN(v)||v<0){ alert('Metti una quantità valida, 0 o più'); input.value=adminProducts[i].stock; return; }
+  adminProducts[i].stock=v;
+  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
+  renderAdminList(); renderNewProducts();
+  let m=document.getElementById('adminMsg'); if(m) m.textContent='✅ Quantità aggiornata ONLINE: '+adminProducts[i].name+' = '+v+' pezzi'+(v===0?' - ora mostra ESAURITO':'')+(v<=5&&v>0?' - ⚠️ Scorte basse':'');
+}
 function renderAdminList(){
   let el=document.getElementById('adminProductList');
   if(!el) return;
   if(adminProducts.length===0){ el.innerHTML='<p>Nessun prodotto aggiunto da Admin ancora. Nessun prodotto esempio. Solo i tuoi prodotti veri. Aggiungi il primo qui sopra.</p>'; return; }
-  el.innerHTML = adminProducts.map((p,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span>${p.photo?`<img src="${p.photo}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:6px">`:''}<b>${p.name}</b> - ${p.cat} - ${p.price}€ - Stock ${p.stock} - ${p.blocked?'🔴 BLOCCATO':'🟢 Visibile'}</span><span><button onclick="toggleBlock(${i})">${p.blocked?'Sblocca':'Blocca'}</button> <button onclick="deleteProduct(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span></div>`).join('');
+  el.innerHTML = adminProducts.map((p,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:10px;border-bottom:1px solid #eee;flex-wrap:wrap;align-items:center"><span style="flex:1;min-width:200px">${p.photo?`<img src="${p.photo}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;vertical-align:middle;margin-right:6px">`:''}<b>${p.name}</b> - ${p.cat} - ${p.price}€ - ${p.blocked?'🔴 BLOCCATO':'🟢 Visibile'}</span><span style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">Quantità: <input id="stock-${i}" type="number" min="0" value="${p.stock||0}" style="width:70px;padding:6px;border:1px solid #ddd;border-radius:8px;text-align:center"> <button onclick="updateProductStock(${i})" style="background:#2e7d32;color:#fff">💾 Salva quantità</button> <button onclick="toggleBlock(${i})">${p.blocked?'Sblocca':'Blocca'}</button> <button onclick="deleteProduct(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span></div>`).join('');
 }
 function addProduct(){
   let cat=document.getElementById('newCat').value;
@@ -415,21 +439,13 @@ function updateCheckout(){
   let fm=document.getElementById('freeShipMsg'); if(fm) fm.textContent = total>=59 ? '✅ Spedizione GRATIS sbloccata! Sopra 59€ non paghi corriere.' : (total>0 ? 'Mancano '+(59-total).toFixed(2)+'€ per spedizione gratis' : '');
   renderPayPal();
 }
-function payFake(){
-  if(cartItems.length===0){ alert('Carrello vuoto, aggiungi prima un prodotto'); return; }
-  let name=document.getElementById('custName').value;
-  let addr=document.getElementById('custAddr').value;
-  if(!name||!addr){ alert('Metti Nome e Indirizzo prima di pagare'); return; }
-  alert('SIMULAZIONE: Ordine da '+cartTotal().toFixed(2)+'€ creato! In produzione qui si apre PayPal vero.');
-  document.getElementById('checkoutMsg').textContent='✅ Ordine simulato creato. Collega PayPal Live in Admin per pagamenti veri.';
-  cartItems=[]; saveCart(); updateCartUI();
-}
+
 document.addEventListener('DOMContentLoaded', ()=>{ updateCartUI(); });
 
 function loadAdminValues(){
   let sbUrl = localStorage.getItem('sbUrl') || localStorage.getItem('VITE_SUPABASE_URL') || '';
   let sbKey = localStorage.getItem('sbKey') || localStorage.getItem('VITE_SUPABASE_ANON_KEY') || '';
-  let pp = localStorage.getItem('ppId') || localStorage.getItem('reboxPaypalId') || localStorage.getItem('VITE_PAYPAL_CLIENT_ID') || '';
+  let pp = (window.REBOX_PAYPAL_ID && !window.REBOX_PAYPAL_ID.includes('TUO-') ? window.REBOX_PAYPAL_ID : '') || localStorage.getItem('ppId') || localStorage.getItem('reboxPaypalId') || localStorage.getItem('VITE_PAYPAL_CLIENT_ID') || '';
   let el1=document.getElementById('sbUrl'); if(el1 && sbUrl) el1.value=sbUrl;
   let el2=document.getElementById('sbKey'); if(el2 && sbKey) el2.value=sbKey;
   let el3=document.getElementById('ppId'); if(el3 && pp) el3.value=pp;
@@ -443,11 +459,11 @@ document.addEventListener('DOMContentLoaded', ()=>{ loadAdminValues(); });
 
 let paypalSDKLoaded = false;
 function loadPayPalSDK(){
-  let clientId = localStorage.getItem('ppId') || localStorage.getItem('reboxPaypalId') || '';
+  let clientId = (window.REBOX_PAYPAL_ID && !window.REBOX_PAYPAL_ID.includes('TUO-') ? window.REBOX_PAYPAL_ID : '') || localStorage.getItem('ppId') || localStorage.getItem('reboxPaypalId') || '';
   let container = document.getElementById('paypal-button-container');
   if(!container) return;
   if(!clientId){
-    container.innerHTML = '<div style="background:#fff3cd;padding:12px;border-radius:10px">⚠️ PayPal non collegato: vai in Admin e salva il tuo <b>PayPal Client ID LIVE</b> (non Sandbox) per far pagare davvero gli utenti. Intanto usa Simula pagamento per provare.</div>';
+    container.innerHTML = '<div style="background:#fff3cd;padding:12px;border-radius:10px">⚠️ PayPal non collegato: vai in Admin e salva il tuo <b>PayPal Client ID LIVE</b>.</div>';
     return;
   }
   let total = cartTotal();
@@ -469,7 +485,7 @@ function loadPayPalSDK(){
   let s = document.createElement('script');
   s.src = 'https://www.paypal.com/sdk/js?client-id='+encodeURIComponent(clientId)+'&currency=EUR&intent=capture';
   s.onload = ()=>{ paypalSDKLoaded=true; renderPayPalButtons(finalTotal); };
-  s.onerror = ()=>{ container.innerHTML='<div style="background:#ffebee;padding:12px;border-radius:10px">❌ Errore a caricare PayPal. Controlla che il Client ID in Admin sia quello LIVE e corretto. Usa intanto Simula pagamento.</div>'; };
+  s.onerror = ()=>{ container.innerHTML='<div style="background:#ffebee;padding:12px;border-radius:10px">❌ Errore a caricare PayPal. Controlla che il Client ID in Admin sia quello LIVE e corretto.</div>'; };
   document.head.appendChild(s);
 }
 function renderPayPalButtons(finalTotal){
