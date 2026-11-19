@@ -52,7 +52,7 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 </div>
 <div class="top">🎄 NATALE: Ordina entro il 18 dicembre • No coda, no freddo, no stress • 3,2,1 ONLINE • Spedizione gratis sopra 59€</div>
 <header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div>
-<nav><a href="#negozio">Negozio</a><a href="#pacchi">Pacchi</a><a href="#aste">Aste 3,2,1</a><a href="#resi">Resi</a><a href="#feedback">Feedback</a><a href="#admin">Admin</a></nav></header>
+<nav><a href="#negozio">Negozio</a><a href="#pacchi">Pacchi</a><a href="#aste">Aste 3,2,1</a><a href="#resi">Resi</a><a href="#feedback">Feedback</a></nav></header>
 
 <div class="hero"><span class="badge">FINO A -66% • PAGHI 1/3, SCOPRI 3X VALORE</span>
 <h1>Il Natale che <em>non ti fa fare la coda</em></h1>
@@ -110,71 +110,8 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 <p style="font-size:12px">PayPal usa il Client ID che hai salvato in Admin. Se hai messo il Client ID <b>LIVE</b>, qui sotto appare il bottone PayPal vero e gli utenti pagano davvero. Se hai messo quello <b>Sandbox</b>, pagano solo soldi finti di prova. Se hai messo il Client ID Live, qui paghi davvero.</p>
 <button onclick="payFake()" style="background:#071A33;color:#fff">Simula pagamento (se PayPal non è ancora collegato)</button>
 </div></section>
-<section id="admin" class="admin"><h2>🔐 Admin REBOX - Solo tu</h2>
-<div id="adminLock"><p>Questa area è solo per te. Inserisci la password Admin per entrare.</p><label>Password Admin</label><input type="password" id="adminPass" placeholder="Inserisci password Admin"><button onclick="unlockAdmin()">Entra in Admin</button><p id="adminLockMsg" style="color:red"></p><p style="font-size:12px">Password iniziale: <b>REBOX2026</b> - cambiala subito dopo il primo accesso.</p></div>
-<div id="adminContent" class="hidden"><p style="background:#d4edda;padding:10px;border-radius:10px">✅ Sei dentro come Admin.</p>
-<label>Supabase URL</label><input id="sbUrl" placeholder="https://tuo-progetto.supabase.co"><label>Supabase Anon Key</label><input id="sbKey" placeholder="anon public key"><label>PayPal Client ID</label><input id="ppId" placeholder="Client ID PayPal Live"><button onclick="saveAdmin()">Salva collegamenti</button><p id="adminMsg"></p>
-<label>Nuova Password Admin</label><input type="password" id="newPass" placeholder="Nuova password"><button onclick="changePass()">Cambia password</button>
-
-
-
-
-<h3>👥 Utenti Registrati - Chi ha fatto offerte, chi ha vinto</h3>
-<p>Qui vedi tutti quelli che si sono registrati per le aste, con email e telefono per avvisarli se vincono.</p>
-<button onclick="loadUsers()">🔄 Vedi utenti registrati</button>
-<div id="usersList" style="background:#fff;padding:12px;border-radius:12px;margin-top:10px">Clicca Vedi utenti registrati.</div>
-<p style="font-size:13px"><b>Quando un'asta si chiude:</b> vai in Gestione Aste, vedi il vincitore, poi qui trovi la sua email e telefono per scrivergli "Hai vinto!". In più gli arriva l'email automatica di PayPal quando paga.</p>
-<h3>🔥 Gestione Aste - DA QUI CREI / CHIUDI / MODIFICHI LE ASTE</h3>
-<p><b>Come si gestisce un'asta:</b> 1. Scrivi nome, prezzo di partenza, ore di durata, link YouTube → 2. Clicca Crea asta → 3. Appare subito nel sito. Per chiuderla: clicca Chiudi asta. Per cancellarla: Elimina.</p>
-<input id="newAuctionName" placeholder="Nome asta - es: Pacco Grande Misterioso">
-<input id="newAuctionStart" type="number" placeholder="Prezzo partenza - es: 20">
-<input id="newAuctionHours" type="number" placeholder="Durata in ore - es: 24">
-<input id="newAuctionYT" placeholder="Link YouTube teaser - https://www.youtube.com/watch?v=...">
-<button onclick="addAuction()">➕ Crea nuova asta</button>
-<p id="auctionAdminMsg"></p>
-<div id="adminAuctionsList" style="background:#fff;padding:12px;border-radius:12px"></div>
-<h3>📦 Modifica Quantità Pacchi - DA QUI CAMBI 48 / 42 / 28</h3>
-<p>Scrivi la quantità vera che hai in magazzino e clicca Salva. Si aggiorna subito nel negozio.</p>
-<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
-<div style="background:#fff;padding:12px;border-radius:12px"><b>Pacco PICCOLO</b><br>Ora: <b id="adminStockPiccolo">48</b><br><input id="inputPiccolo" type="number" placeholder="Es: 48"><button onclick="saveBoxStock('Piccolo')">Salva Piccolo</button></div>
-<div style="background:#fff;padding:12px;border-radius:12px"><b>Pacco MEDIO</b><br>Ora: <b id="adminStockMedio">42</b><br><input id="inputMedio" type="number" placeholder="Es: 42"><button onclick="saveBoxStock('Medio')">Salva Medio</button></div>
-<div style="background:#fff;padding:12px;border-radius:12px"><b>Pacco GRANDE</b><br>Ora: <b id="adminStockGrande">28</b><br><input id="inputGrande" type="number" placeholder="Es: 28"><button onclick="saveBoxStock('Grande')">Salva Grande</button></div>
-</div>
-<p id="boxStockMsg" style="font-weight:800;color:#00A88F"></p>
-<p style="font-size:13px"><b>Come funziona:</b> Quando qualcuno compra un pacco, la quantità scende da sola di 1. Se arriva a 0 diventa ESAURITO da solo. Tu la rialzi da qui quando ti arriva nuova merce.</p>
-<h3>📦 Gestione Prodotti e Categorie - DA QUI INSERISCI / MODIFICHI / ELIMINI</h3>
-<p><b>Come funziona:</b> 1. Scrivi prodotto → 2. Clicca Aggiungi → 3. Appare subito nel negozio. Per eliminare / bloccare, usa i bottoni sotto nella lista.</p>
-<label>Categoria</label><select id="newCat">
-<option>Casa & Arredo</option><option>Cucina</option><option>Fai-da-te & Utensili</option><option>Elettronica & Tech</option><option>Giardino & Outdoor</option><option>Bambini & Giocattoli</option><option>Bellezza & Cura</option><option>Sport & Fitness</option>
-</select>
-<input id="newName" placeholder="Nome prodotto - es: Trapano avvitatore">
-<input id="newOld" type="number" placeholder="Prezzo vecchio - es: 89">
-<input id="newPrice" type="number" placeholder="Prezzo REBOX - es: 29">
-<input id="newStock" type="number" placeholder="Stock - es: 12">
-<label style="font-weight:800">📸 Foto prodotto - max 1MB - JPG / PNG / WEBP</label>
-<input id="newPhoto" type="file" accept=".jpg,.jpeg,.png,.webp">
-<div id="newPhotoPreview" style="margin:6px 0"></div>
-<p style="font-size:12px">Se non metti foto, il prodotto appare senza foto. Con foto vende 3 volte di più.</p>
-<button onclick="addProduct()">➕ Aggiungi prodotto al negozio</button>
-<p id="addMsg"></p>
-<h4>Nuova Categoria</h4>
-<input id="newCatName" placeholder="Nome nuova categoria - es: Auto & Moto">
-<button onclick="addCategory()">➕ Crea nuova categoria</button>
-<p style="font-size:13px">Dopo aver creato la categoria, la trovi nel menu a tendina sopra e puoi metterci prodotti.</p>
-<h4>Lista Prodotti - Elimina / Blocca / Sblocca</h4>
-<div id="adminProductList" style="background:#fff;padding:12px;border-radius:12px"></div>
-<p style="font-size:13px"><b>Elimina</b> = sparisce per sempre. <b>Blocca</b> = resta salvato ma non si vede nel negozio, lo puoi sbloccare quando vuoi. <b>Stock 0</b> = in automatico diventa ESAURITO.</p>
-
-<h3>🔔 Notifiche Ordini - Qui vedi chi ha comprato</h3>
-<p><b>Come ti arriva l'avviso:</b><br>
-1. <b>PayPal ti manda subito un'email</b> quando qualcuno paga - è automatico, devi solo controllare la mail del tuo PayPal.<br>
-2. <b>Ordine salvato in Supabase</b> - se hai collegato Supabase in Admin, l'ordine va lì e lo vedi qui sotto.<br>
-3. <b>Ordine salvato anche in questo browser</b> - per prova.</p>
-<button onclick="loadOrders()">🔄 Aggiorna lista ordini</button>
-<div id="ordersList" style="background:#fff;padding:12px;border-radius:12px;margin-top:10px">Nessun ordine ancora. Quando qualcuno paga, apparirà qui.</div>
-<p style="font-size:13px">Per ricevere anche un'email da Supabase: Supabase > Authentication > Email Templates, oppure collega Resend / Netlify Forms. PayPal da solo già ti avvisa.</p>
-<h3>Stock per categoria</h3><table><tr><th>Categoria</th><th>Prodotti</th><th>Stato</th></tr><tr><td>Casa & Arredo</td><td>6</td><td>Disponibile</td></tr><tr><td>Cucina</td><td>6</td><td>Disponibile</td></tr><tr><td>Fai-da-te</td><td>6</td><td>Ultimi pezzi</td></tr><tr><td>Elettronica</td><td>6</td><td>Disponibile</td></tr><tr><td>Giardino</td><td>6</td><td>Disponibile</td></tr><tr><td>Bambini</td><td>6</td><td>Disponibile</td></tr><tr><td>Bellezza</td><td>6</td><td>Disponibile</td></tr><tr><td>Sport</td><td>6</td><td>Disponibile</td></tr></table></div></section>
-</div><footer>REBOX • Resi • Stock • Casa • © 2026 • Termini • Privacy • Resi e Rimborsi • Contenuto non verificato singolarmente, marca/modello non garantiti.</footer>
+<!-- Admin rimosso da questa pagina pubblica. Usa admin.html per gestire il sito. -->
+<footer>REBOX • Resi • Stock • Casa • © 2026 • Termini • Privacy • Resi e Rimborsi • Contenuto non verificato singolarmente, marca/modello non garantiti.</footer>
 <script>
 // === CARRELLO UNICO - UNA SOLA FUNZIONE BUY ===
 var cartItems = JSON.parse(localStorage.getItem('reboxCart')||'[]');
@@ -252,8 +189,56 @@ function renderNewProducts(){
   box.innerHTML='<h3>✨ Nuovi prodotti aggiunti da Admin</h3><div class="grid">'+vis.map(p=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<button onclick="buy(\''+p.name+'\','+p.price+')">Aggiungi al carrello</button>'}<br><small>Da Admin puoi Bloccare / Eliminare</small></div>`).join('')+'</div>';
 }
 // Mostra lista appena entri in Admin
-let _oldUnlock = unlockAdmin;
-unlockAdmin = function(){ _oldUnlock(); setTimeout(()=>{ renderAdminList(); renderNewProducts(); },100); };
+
+// --- ADMIN LOGIN - RISCRITTO, ORA FUNZIONA ---
+function getAdminPass(){ return localStorage.getItem('reboxAdminPass') || 'REBOX2026'; }
+function unlockAdmin(){
+  let inp = document.getElementById('adminPass');
+  let msg = document.getElementById('adminLockMsg');
+  let val = inp ? inp.value.trim() : '';
+  if(!val){ if(msg) msg.textContent='⚠️ Scrivi la password prima.'; return; }
+  if(val === getAdminPass()){
+    document.getElementById('adminLock').style.display='none';
+    let c=document.getElementById('adminContent'); if(c) c.classList.remove('hidden');
+    if(msg) msg.textContent='';
+    if(typeof renderAdminList==='function') renderAdminList();
+    if(typeof renderNewProducts==='function') renderNewProducts();
+    if(typeof renderAdminAuctions==='function') renderAdminAuctions();
+    if(typeof loadAdminValues==='function') loadAdminValues();
+    alert('✅ Benvenuto in Admin!');
+  } else {
+    if(msg) msg.textContent='❌ Password sbagliata. Riprova.';
+    if(inp) inp.value=''; inp.focus();
+  }
+}
+function changePass(){
+  let np=document.getElementById('newPass');
+  let v=np?np.value.trim():'';
+  if(v.length<6){ alert('Password troppo corta: almeno 6 caratteri.'); return; }
+  localStorage.setItem('reboxAdminPass', v);
+  if(np) np.value='';
+  alert('✅ Password cambiata! La prossima volta entra con: '+v);
+}
+function saveAdmin(){
+  let u=document.getElementById('sbUrl')?.value.trim()||'';
+  let k=document.getElementById('sbKey')?.value.trim()||'';
+  let p=document.getElementById('ppId')?.value.trim()||'';
+  localStorage.setItem('reboxSbUrl',u); localStorage.setItem('reboxSbKey',k); localStorage.setItem('reboxPaypalId',p);
+  localStorage.setItem('reboxAdminSavedAt', new Date().toLocaleString('it-IT'));
+  let m=document.getElementById('adminMsg'); if(m) m.textContent='✅ Salvato! Supabase e PayPal restano salvati, non devi rimetterli.';
+  alert('✅ Collegamenti salvati!');
+}
+function loadAdminValues(){
+  let u=document.getElementById('sbUrl'); if(u) u.value=localStorage.getItem('reboxSbUrl')||'';
+  let k=document.getElementById('sbKey'); if(k) k.value=localStorage.getItem('reboxSbKey')||'';
+  let p=document.getElementById('ppId'); if(p) p.value=localStorage.getItem('reboxPaypalId')||'';
+}
+// Invio con Enter nella password
+document.addEventListener('DOMContentLoaded', ()=>{
+  let inp=document.getElementById('adminPass');
+  if(inp) inp.addEventListener('keydown', e=>{ if(e.key==='Enter') unlockAdmin(); });
+});
+
 document.addEventListener('DOMContentLoaded', ()=>{ renderNewProducts(); });
 
 function renderShop(){
