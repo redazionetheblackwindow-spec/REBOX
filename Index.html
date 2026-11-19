@@ -56,13 +56,24 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 <section id="checkout"><h2>🛒 Checkout</h2><p>Carrello: <b id="cart">Nessun prodotto</b> • Totale: <b id="total">0€</b></p>
 <label>Scegli il corriere</label><select id="courier"><option>GLS 24/48h - 5,90€ (consigliato Natale)</option><option>BRT 24/48h - 6,90€</option><option>Poste Italiane 3-7 giorni - 4,90€</option><option>InPost Locker 24/7 - 4,50€</option><option>DHL Express - 9,90€</option><option>UPS - 8,90€</option></select>
 <input placeholder="Nome e cognome"><input placeholder="Indirizzo completo"><button onclick="alert('In produzione qui si apre PayPal Checkout con il tuo Client ID. Configuralo in Admin > Impostazioni.')">Paga con PayPal</button></section>
-<section id="admin" class="admin"><h2>🔐 Admin REBOX</h2><p>Collega qui Supabase + PayPal. In produzione questi dati vanno nelle variabili Netlify.</p>
+<section id="admin" class="admin"><h2>🔐 Admin REBOX - Solo tu</h2>
+<div id="adminLock">
+<p>Questa area è solo per te. Inserisci la password Admin per entrare.</p>
+<label>Password Admin</label><input type="password" id="adminPass" placeholder="Inserisci password Admin">
+<button onclick="unlockAdmin()">Entra in Admin</button>
+<p id="adminLockMsg" style="color:red"></p>
+<p style="font-size:12px">Password iniziale: <b>REBOX2026</b> - cambiala subito dopo il primo accesso in Impostazioni Admin. In produzione va sostituita con login Supabase Auth / Netlify Identity, questa è una protezione base per non far entrare chiunque.</p>
+</div>
+<div id="adminContent" class="hidden">
+<p style="background:#d4edda;padding:10px;border-radius:10px">✅ Sei dentro come Admin. Gli altri visitatori vedono solo la richiesta password.</p>
 <label>Supabase URL</label><input id="sbUrl" placeholder="https://tuo-progetto.supabase.co">
 <label>Supabase Anon Key (solo pubblica, mai Secret)</label><input id="sbKey" placeholder="anon public key">
 <label>PayPal Client ID</label><input id="ppId" placeholder="Client ID PayPal Live">
 <button onclick="saveAdmin()">Salva collegamenti</button><p id="adminMsg"></p>
+<label>Nuova Password Admin (per cambiarla)</label><input type="password" id="newPass" placeholder="Nuova password"><button onclick="changePass()">Cambia password</button>
 <h3>Stock</h3><table><tr><th>Prodotto</th><th>Stock</th><th>Stato</th></tr><tr><td>Pacco Piccolo</td><td>48</td><td>Disponibile</td></tr><tr><td>Pacco Medio</td><td>42</td><td>Disponibile</td></tr><tr><td>Pacco Grande</td><td>28</td><td>Disponibile</td></tr><tr><td>Trapano avvitatore</td><td>0</td><td><b>ESAURITO</b></td></tr></table>
-<p><b>Checklist Netlify:</b> 1. Repo GitHub rebox 2. Netlify > Import > GitHub 3. Build: npm run build / Publish: dist (o vuoto / . se solo HTML) 4. Env: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_PAYPAL_CLIENT_ID</p></section>
+<p><b>Checklist Netlify:</b> 1. Repo GitHub rebox 2. Netlify > Import > GitHub 3. Build: vuoto / Publish: . 4. Env: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_PAYPAL_CLIENT_ID</p>
+</div></section>
 </div><footer>REBOX • Resi • Stock • Casa • © 2026 • Termini • Privacy • Resi e Rimborsi • Contenuto non verificato singolarmente, marca/modello non garantiti.</footer>
 <script>
 let cart=[],total=0,curBid=45;
@@ -73,5 +84,7 @@ function bid(){curBid+=5;document.getElementById('bid').textContent=curBid+'€'
 function showYT(){let u=document.getElementById('yt').value;let id='';if(u.includes('v='))id=u.split('v=')[1].split('&')[0];else if(u.includes('youtu.be/'))id=u.split('youtu.be/')[1].split('?')[0];if(!id){alert('Incolla un link YouTube valido');return;}document.getElementById('ytbox').innerHTML='<iframe width="100%" height="315" src="https://www.youtube.com/embed/'+id+'" frameborder="0" allowfullscreen></iframe>';}
 document.getElementById('photo').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;if(f.size>1048576){document.getElementById('photoMsg').innerHTML='<b style="color:red">Foto troppo grande: max 1MB. Comprimila e riprova.</b>';e.target.value='';return;}document.getElementById('photoMsg').textContent='Foto caricata: '+f.name+' - '+(f.size/1024/1024).toFixed(2)+'MB';});
 function sendFeedback(){alert('Recensione inviata in attesa di moderazione Admin. Grazie!');}
+function unlockAdmin(){let p=document.getElementById('adminPass').value;let saved=localStorage.getItem('reboxAdminPass')||'REBOX2026';if(p===saved){document.getElementById('adminLock').classList.add('hidden');document.getElementById('adminContent').classList.remove('hidden');}else{document.getElementById('adminLockMsg').textContent='Password sbagliata. Riprova.';}}
+function changePass(){let n=document.getElementById('newPass').value;if(n.length<6){alert('Password troppo corta, minimo 6 caratteri');return;}localStorage.setItem('reboxAdminPass',n);alert('Password Admin cambiata! Da ora usa la nuova password.');}
 function saveAdmin(){localStorage.setItem('sbUrl',document.getElementById('sbUrl').value);localStorage.setItem('sbKey',document.getElementById('sbKey').value);localStorage.setItem('ppId',document.getElementById('ppId').value);document.getElementById('adminMsg').textContent='Collegamenti salvati! Ora il sito è pronto a usare Supabase + PayPal.';}
 </script></body></html>
