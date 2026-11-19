@@ -29,7 +29,7 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 .box-card .box-badge2{position:absolute;top:12px;right:12px;background:#00A88F;color:#fff;padding:6px 12px;border-radius:999px;font-weight:900;font-size:13px}
 .box-price{font-size:32px!important;color:#FF7A00}
 </style>
-</head><body><div style="background:#111;color:#fff;padding:10px;text-align:center;font-weight:900">🔐 PAGINA ADMIN SEGRETA - NON CONDIVIDERE QUESTO LINK - <a href="index.html" style="color:#FF7A00">Torna al sito</a></div>
+<script src="config.js"></script></head><body><div style="background:#111;color:#fff;padding:10px;text-align:center;font-weight:900">🔐 PAGINA ADMIN SEGRETA - NON CONDIVIDERE QUESTO LINK - <a href="index.html" style="color:#FF7A00">Torna al sito</a></div>
 
 <div id="accountBar" style="background:#00A88F;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:700">
 <span id="accountStatus">👤 Non sei registrato - Per fare un'offerta all'asta devi registrarti</span>
@@ -131,7 +131,7 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 <input id="newAuctionHours" type="number" placeholder="Durata in ore - es: 24">
 <input id="newAuctionYT" placeholder="Link YouTube teaser - https://www.youtube.com/watch?v=...">
 <button onclick="addAuction()">➕ Crea nuova asta</button>
-<p id="auctionAdminMsg"></p>
+<p id="auctionAdminMsg"></p><button onclick="deleteAllAuctions()" style="background:#d32f2f;color:#fff;margin-top:8px">Elimina TUTTE le aste</button> <button onclick="loadAuctionsFromCloud()" style="margin-top:8px">Sincronizza aste</button><p style="font-size:12px">Se cancelli qui, ora si cancella anche su Supabase. Se il telefono la mostra ancora, ricarica la pagina da telefono.</p>
 <div id="adminAuctionsList" style="background:#fff;padding:12px;border-radius:12px"></div>
 <h3>📦 Modifica Quantità Pacchi - DA QUI CAMBI 48 / 42 / 28</h3>
 <p>Scrivi la quantità vera che hai in magazzino e clicca Salva. Si aggiorna subito nel negozio.</p>
@@ -209,6 +209,32 @@ let cart=[],total=0,curBid=45;
 
 
 let adminProducts = JSON.parse(localStorage.getItem('reboxAdminProducts')||'[]');
+// --- PRODOTTI ONLINE su Supabase, NON più solo local ---
+async function saveProductsToCloud(){
+  try{
+    let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.includes('TUO-PROGETTO')) return;
+    await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'products',value:adminProducts})});
+  }catch(e){ console.log('save prodotti cloud',e); }
+}
+async function loadProductsFromCloud(){
+  try{
+    let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.includes('TUO-PROGETTO')) return;
+    let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.products',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    let j=await r.json();
+    if(j&&j[0]&&Array.isArray(j[0].value)){
+      adminProducts=j[0].value;
+      localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
+      if(typeof renderAdminList==='function') renderAdminList();
+      if(typeof renderNewProducts==='function') renderNewProducts();
+      if(typeof renderShop==='function') renderShop();
+    }
+  }catch(e){ console.log('load prodotti cloud',e); }
+}
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadProductsFromCloud,800); });
 function renderAdminList(){
   let el=document.getElementById('adminProductList');
   if(!el) return;
@@ -223,17 +249,17 @@ function addProduct(){
   let stock=document.getElementById('newStock').value;
   if(!name||!price){ alert('Metti almeno Nome e Prezzo REBOX'); return; }
   adminProducts.push({cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||''}); tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
-  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts));
+  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
   document.getElementById('addMsg').textContent='✅ '+name+' aggiunto in '+cat+'! Ora è visibile nel negozio.';
   document.getElementById('newName').value=''; renderAdminList(); renderNewProducts();
 }
 function deleteProduct(i){
   if(!confirm('Sei sicuro? Elimini '+adminProducts[i].name+' per sempre.')) return;
-  adminProducts.splice(i,1); localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); renderAdminList(); renderNewProducts();
+  adminProducts.splice(i,1); localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); renderAdminList(); renderNewProducts();
 }
 function toggleBlock(i){
   adminProducts[i].blocked=!adminProducts[i].blocked;
-  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); renderAdminList(); renderNewProducts();
+  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); renderAdminList(); renderNewProducts();
 }
 function addCategory(){
   let n=document.getElementById('newCatName').value.trim();
@@ -254,7 +280,35 @@ function renderNewProducts(){
 // Mostra lista appena entri in Admin
 
 // --- ADMIN LOGIN - RISCRITTO, ORA FUNZIONA ---
-function getAdminPass(){ return localStorage.getItem('reboxAdminPass') || 'REBOX2026'; }
+var cloudAdminPass = null;
+async function loadAdminConfigFromCloud(){
+  try{
+    let url=window.REBOX_SB_URL||localStorage.getItem('reboxSbUrl')||'';
+    let key=window.REBOX_SB_KEY||localStorage.getItem('reboxSbKey')||'';
+    if(!url||!key||url.includes('TUO-PROGETTO')) return;
+    let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.admin_config',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    let j=await r.json();
+    if(j&&j[0]&&j[0].value){
+      let cfg=j[0].value;
+      if(cfg.pass){ cloudAdminPass=cfg.pass; localStorage.setItem('reboxAdminPass', cfg.pass); }
+      if(cfg.sbUrl){ localStorage.setItem('reboxSbUrl', cfg.sbUrl); let el=document.getElementById('sbUrl'); if(el) el.value=cfg.sbUrl; }
+      if(cfg.sbKey){ localStorage.setItem('reboxSbKey', cfg.sbKey); let el=document.getElementById('sbKey'); if(el) el.value=cfg.sbKey; }
+      if(cfg.ppId){ localStorage.setItem('reboxPaypalId', cfg.ppId); let el=document.getElementById('ppId'); if(el) el.value=cfg.ppId; }
+      if(cfg.savedAt){ localStorage.setItem('reboxAdminSavedAt', cfg.savedAt); }
+    }
+  }catch(e){ console.log('load admin config',e); }
+}
+async function saveAdminConfigToCloud(){
+  try{
+    let url=window.REBOX_SB_URL||localStorage.getItem('reboxSbUrl')||'';
+    let key=window.REBOX_SB_KEY||localStorage.getItem('reboxSbKey')||'';
+    if(!url||!key||url.includes('TUO-PROGETTO')) return;
+    let cfg={pass: localStorage.getItem('reboxAdminPass')||'REBOX2026', sbUrl: localStorage.getItem('reboxSbUrl')||'', sbKey: localStorage.getItem('reboxSbKey')||'', ppId: localStorage.getItem('reboxPaypalId')||'', savedAt: new Date().toLocaleString('it-IT')};
+    await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'admin_config',value:cfg})});
+  }catch(e){ console.log('save admin config',e); }
+}
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadAdminConfigFromCloud,500); });
+function getAdminPass(){ return cloudAdminPass || localStorage.getItem('reboxAdminPass') || 'REBOX2026'; }
 function unlockAdmin(){
   let inp = document.getElementById('adminPass');
   let msg = document.getElementById('adminLockMsg');
@@ -278,7 +332,7 @@ function changePass(){
   let np=document.getElementById('newPass');
   let v=np?np.value.trim():'';
   if(v.length<6){ alert('Password troppo corta: almeno 6 caratteri.'); return; }
-  localStorage.setItem('reboxAdminPass', v);
+  localStorage.setItem('reboxAdminPass', v); cloudAdminPass=v; saveAdminConfigToCloud();
   if(np) np.value='';
   alert('✅ Password cambiata! La prossima volta entra con: '+v);
 }
@@ -288,7 +342,7 @@ function saveAdmin(){
   let p=document.getElementById('ppId')?.value.trim()||'';
   localStorage.setItem('reboxSbUrl',u); localStorage.setItem('reboxSbKey',k); localStorage.setItem('reboxPaypalId',p);
   localStorage.setItem('reboxAdminSavedAt', new Date().toLocaleString('it-IT'));
-  let m=document.getElementById('adminMsg'); if(m) m.textContent='✅ Salvato! Supabase e PayPal restano salvati, non devi rimetterli.';
+  let m=document.getElementById('adminMsg'); if(m) m.textContent='✅ Salvato ONLINE! Ora li trovi anche da un altro PC / telefono.'; saveAdminConfigToCloud();
   alert('✅ Collegamenti salvati!');
 }
 function loadAdminValues(){
@@ -519,7 +573,7 @@ function saveBoxStock(which){
   let val = parseInt(document.getElementById('input'+which).value);
   if(isNaN(val) || val<0){ alert('Scrivi un numero valido, es: 30'); return; }
   boxStocks[which]=val;
-  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks));
+  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks)); saveBoxStocksToCloud();
   renderBoxStocks();
   document.getElementById('boxStockMsg').textContent='✅ Pacco '+which+' aggiornato a '+val+'! Ora nel negozio si vede '+val+'.';
 }
@@ -527,17 +581,16 @@ function decrementBoxStock(name){
   if(name.includes('Piccolo') && boxStocks.Piccolo>0) boxStocks.Piccolo--;
   if(name.includes('Medio') && boxStocks.Medio>0) boxStocks.Medio--;
   if(name.includes('Grande') && boxStocks.Grande>0) boxStocks.Grande--;
-  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks));
+  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks)); saveBoxStocksToCloud();
   renderBoxStocks();
 }
 document.addEventListener('DOMContentLoaded', renderBoxStocks);
 
-var auctions = JSON.parse(localStorage.getItem('reboxAuctions')||'null') || [
-  {id:1, name:'Pacco Grande Misterioso', bid:120, end: Date.now()+2*3600*1000+14*60*1000+33*1000, yt:'', bids:[{who:'Marco', amt:120, when:'ora'},{who:'Elena', amt:115, when:'10 min fa'},{who:'Luca', amt:110, when:'22 min fa'}], closed:false},
-  {id:2, name:'Set Cucina Misterioso', bid:28, end: Date.now()+5*3600*1000+22*60*1000+10*1000, yt:'', bids:[{who:'Giulia', amt:28, when:'ora'},{who:'Paolo', amt:23, when:'18 min fa'},{who:'Sara', amt:18, when:'35 min fa'}], closed:false},
-  {id:3, name:'Tech Misterioso', bid:32, end: Date.now()+1*3600*1000+5*60*1000+44*1000, yt:'', bids:[{who:'Anna', amt:32, when:'ora'},{who:'Davide', amt:27, when:'5 min fa'},{who:'Marta', amt:22, when:'12 min fa'}], closed:false}
-];
-function saveAuctions(){ localStorage.setItem('reboxAuctions', JSON.stringify(auctions)); }
+var auctions = JSON.parse(localStorage.getItem('reboxAuctions')||'[]'); // SOLO ADMIN - Niente aste esempio che ritornano. Se cancelli, resta vuoto.
+function saveAuctions(){ localStorage.setItem('reboxAuctions', JSON.stringify(auctions)); saveAuctionsToCloud(); }
+async function saveAuctionsToCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'auctions',value:auctions})}); }catch(e){ console.log('save aste cloud',e); } }
+async function loadAuctionsFromCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.auctions',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let j=await r.json(); if(j&&j[0]&&Array.isArray(j[0].value)){ auctions=j[0].value; localStorage.setItem('reboxAuctions',JSON.stringify(auctions)); renderAuctions(); renderAdminAuctions(); } }catch(e){ console.log('load aste cloud',e); } }
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadAuctionsFromCloud,800); });
 function fmtTime(ms){
   if(ms<=0) return 'CHIUSA';
   let s=Math.floor(ms/1000); let h=Math.floor(s/3600); let m=Math.floor((s%3600)/60); let sec=s%60;
@@ -598,10 +651,8 @@ function closeAuction(i){
 function reopenAuction(i){
   auctions[i].closed=false; auctions[i].end=Date.now()+24*3600*1000; saveAuctions(); renderAuctions(); renderAdminAuctions();
 }
-function deleteAuction(i){
-  if(!confirm('Elimini '+auctions[i].name+'?')) return;
-  auctions.splice(i,1); saveAuctions(); renderAuctions(); renderAdminAuctions();
-}
+function deleteAuction(i){ if(!confirm('Elimini '+auctions[i].name+'? Non tornera piu.')) return; auctions.splice(i,1); saveAuctions(); renderAuctions(); renderAdminAuctions(); alert('Asta eliminata. Ora non la vedono piu nemmeno da telefono.'); }
+function deleteAllAuctions(){ if(!confirm('Elimini TUTTE le aste?')) return; auctions=[]; saveAuctions(); renderAuctions(); renderAdminAuctions(); alert('Tutte le aste eliminate.'); }
 function renderAdminAuctions(){
   let el=document.getElementById('adminAuctionsList'); if(!el) return;
   if(auctions.length===0){ el.innerHTML='Nessuna asta. Creane una qui sopra.'; return; }
@@ -684,6 +735,33 @@ document.addEventListener('change', function(e){
     r.readAsDataURL(f);
   }
 });
+
+// --- SYNC QUANTITATIVI PC <-> TELEFONO via Supabase ---
+async function syncBoxStocksFromCloud(){
+  try{
+    let url = localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key = localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key) return;
+    let r = await fetch(url+'/rest/v1/rebox_settings?id=eq.box_stocks', {headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    let j = await r.json();
+    if(j && j[0] && j[0].value){
+      boxStocks = j[0].value;
+      localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks)); saveBoxStocksToCloud();
+      if(typeof renderBoxStocks==='function') renderBoxStocks();
+      if(typeof renderBoxes==='function') renderBoxes();
+    }
+  }catch(e){ console.log('sync cloud errore',e); }
+}
+async function saveBoxStocksToCloud(){
+  try{
+    let url = localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key = localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key) return;
+    await fetch(url+'/rest/v1/rebox_settings', {method:'POST', headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'}, body: JSON.stringify({id:'box_stocks', value: boxStocks})});
+  }catch(e){ console.log('save cloud errore',e); }
+}
+// All'avvio, prova a prendere i quantitativi veri da Supabase
+document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFromCloud, 800); });
 </script>
 <div id="cartBar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#FF7A00;color:#071A33;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:900;box-shadow:0 -4px 20px rgba(0,0,0,.4);font-size:16px">
 <span>🛒 <span id="cartBarText">Carrello vuoto</span> • Totale: <span id="cartBarTotal" style="font-size:20px">0€</span></span>

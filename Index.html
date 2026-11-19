@@ -146,6 +146,32 @@ let cart=[],total=0,curBid=45;
 
 
 let adminProducts = JSON.parse(localStorage.getItem('reboxAdminProducts')||'[]');
+// --- PRODOTTI ONLINE su Supabase, NON più solo local ---
+async function saveProductsToCloud(){
+  try{
+    let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.includes('TUO-PROGETTO')) return;
+    await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'products',value:adminProducts})});
+  }catch(e){ console.log('save prodotti cloud',e); }
+}
+async function loadProductsFromCloud(){
+  try{
+    let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.includes('TUO-PROGETTO')) return;
+    let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.products',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    let j=await r.json();
+    if(j&&j[0]&&Array.isArray(j[0].value)){
+      adminProducts=j[0].value;
+      localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
+      if(typeof renderAdminList==='function') renderAdminList();
+      if(typeof renderNewProducts==='function') renderNewProducts();
+      if(typeof renderShop==='function') renderShop();
+    }
+  }catch(e){ console.log('load prodotti cloud',e); }
+}
+document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadProductsFromCloud,800); });
 function renderAdminList(){
   let el=document.getElementById('adminProductList');
   if(!el) return;
@@ -160,17 +186,17 @@ function addProduct(){
   let stock=document.getElementById('newStock').value;
   if(!name||!price){ alert('Metti almeno Nome e Prezzo REBOX'); return; }
   adminProducts.push({cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||''}); tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
-  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts));
+  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
   document.getElementById('addMsg').textContent='✅ '+name+' aggiunto in '+cat+'! Ora è visibile nel negozio.';
   document.getElementById('newName').value=''; renderAdminList(); renderNewProducts();
 }
 function deleteProduct(i){
   if(!confirm('Sei sicuro? Elimini '+adminProducts[i].name+' per sempre.')) return;
-  adminProducts.splice(i,1); localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); renderAdminList(); renderNewProducts();
+  adminProducts.splice(i,1); localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); renderAdminList(); renderNewProducts();
 }
 function toggleBlock(i){
   adminProducts[i].blocked=!adminProducts[i].blocked;
-  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); renderAdminList(); renderNewProducts();
+  localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); renderAdminList(); renderNewProducts();
 }
 function addCategory(){
   let n=document.getElementById('newCatName').value.trim();
