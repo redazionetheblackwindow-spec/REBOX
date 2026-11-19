@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>REBOX - Resi Stock Casa | Pacchi Misteriosi, Aste, -66%</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:system-ui,Arial;background:#071A33;color:#fff}
+a{color:#FF7A00}.top{background:#FF7A00;color:#071A33;text-align:center;padding:10px;font-weight:800}
+header{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;background:#0A2540;position:sticky;top:0}
+.logo{font-size:28px;font-weight:900}.logo span{color:#FF7A00}.logo small{display:block;font-size:11px;letter-spacing:3px;color:#2EC4A6}
+nav a{color:#fff;text-decoration:none;margin:0 10px;font-weight:700}nav a:hover{color:#FF7A00}
+.hero{padding:50px 20px;text-align:center;background:linear-gradient(180deg,#0A2540,#071A33)}
+.hero h1{font-size:44px;margin:10px 0}.hero h1 em{color:#FF7A00;font-style:normal}
+.hero p{font-size:18px;opacity:.9}.btn{display:inline-block;background:#FF7A00;color:#071A33;padding:14px 22px;border-radius:999px;font-weight:900;text-decoration:none;margin:8px}.btn2{background:#00A88F;color:#fff}
+.badge{display:inline-block;background:#FFD166;color:#071A33;padding:6px 12px;border-radius:999px;font-weight:800}
+.wrap{max-width:1100px;margin:auto;padding:20px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px}
+.card{background:#fff;color:#111;border-radius:18px;padding:18px}.card h3{margin:6px 0}.price{font-size:28px;font-weight:900}.old{text-decoration:line-through;color:#888}.stock{font-weight:800}.out{background:#ddd;color:#333;padding:10px;border-radius:10px;text-align:center;font-weight:900}
+input,select,textarea{width:100%;padding:12px;border:1px solid #ccc;border-radius:10px;margin:6px 0}
+button{cursor:pointer;background:#FF7A00;border:0;padding:12px 16px;border-radius:999px;font-weight:900}
+section{background:#fff;color:#111;border-radius:20px;padding:22px;margin:18px 0}
+footer{padding:30px;text-align:center;opacity:.8}.hidden{display:none}
+.admin{background:#FFF3E6;color:#111;border-radius:20px;padding:20px}
+table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left}
+</style></head>
+<body>
+<div class="top">🎄 NATALE: Ordina entro il 18 dicembre per ricevere in tempo • No coda, no freddo, no stress • 3,2,1 ONLINE</div>
+<header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div>
+<nav><a href="#negozio">Negozio</a><a href="#pacchi">Pacchi</a><a href="#aste">Aste 3,2,1</a><a href="#resi">Resi</a><a href="#feedback">Feedback</a><a href="#admin">Admin</a></nav></header>
+<div class="hero"><span class="badge">FINO A -66% • PAGHI 1/3, SCOPRI 3X VALORE</span>
+<h1>Il Natale che <em>non ti fa fare la coda</em></h1>
+<p>Pacchi misteriosi da resi e stock di grandi marketplace e grandi catene casa / fai-da-te. Aste 3,2,1 online. Paghi con PayPal, scegli il corriere.</p>
+<p><b>Loro ti fanno fare la coda. Noi ti facciamo restare a casa.</b></p>
+<a class="btn" href="#pacchi">Trova il regalo perfetto</a><a class="btn btn2" href="#aste">Vedi le aste di Natale</a>
+<p style="font-size:13px">Pezzi e valore solo di riferimento. Contenuto esatto non conoscibile prima dell'apertura.</p></div>
+<div class="wrap">
+<section id="negozio"><h2>🛒 Negozio al dettaglio</h2><div class="grid" id="products"></div></section>
+<section id="pacchi"><h2>📦 Pacchi Misteriosi REBOX</h2><p><b>Numero pezzi variabile in base alla dimensione degli oggetti contenuti. I pezzi indicati sono solo di riferimento.</b><br>Se dentro ci sono oggetti grandi, i pezzi saranno di meno. Se ci sono oggetti piccoli, i pezzi saranno di più.<br><b>Valore stimato solo di riferimento. Il valore reale e il contenuto esatto non sono conoscibili prima dell'apertura.</b></p>
+<div class="grid">
+<div class="card"><h3>Pacco PICCOLO</h3><div class="price">19€</div><p><b>Fino a 15 pezzi</b></p><p>Disponibili: <span class="stock">48</span></p><button onclick="buy('Pacco Piccolo',19)">Acquista alla cieca</button></div>
+<div class="card"><h3>Pacco MEDIO</h3><div class="price">39€</div><p><b>Da 16 a 30 pezzi</b></p><p>Disponibili: <span class="stock">42</span></p><button onclick="buy('Pacco Medio',39)">Acquista alla cieca</button></div>
+<div class="card"><h3>Pacco GRANDE</h3><div class="price">79€</div><p><b>Oltre 30 pezzi</b></p><p>Disponibili: <span class="stock">28</span></p><button onclick="buy('Pacco Grande',79)">Acquista alla cieca</button></div>
+</div></section>
+<section id="aste"><h2>🔥 Aste 3,2,1 Online</h2><p><b>3 • 2 • 1 • da casa tua!</b> Guarda il teaser YouTube, fai la tua offerta, vinci senza coda sotto il sole, sotto l'acqua, al freddo e al gelo.</p>
+<div class="card"><h3>Asta: Pacco Grande Misterioso</h3><p>Offerta attuale: <b id="bid">45€</b> • Finisce tra: <b>02:14:33</b></p>
+<label>Incolla link YouTube teaser (Admin lo collega qui)</label><input id="yt" placeholder="https://www.youtube.com/watch?v=..."><button onclick="showYT()">Guarda il teaser</button><div id="ytbox"></div>
+<p style="font-size:13px">TEASER - Vedi un assaggio, non tutto. Cosa si intravede: 3 oggetti mostrati / Totale nascosti. Il resto lo scopri solo se vinci.</p>
+<button onclick="bid()">Fai un'offerta +5€</button></div></section>
+<section id="resi"><h2>↩️ Resi e Rimborsi</h2><p><b>Reso facile: 14 giorni se il pacco è ancora sigillato. Se lo apri, hai accettato la sorpresa. Se qualcosa è rotto o manca, ti rimborsiamo noi.</b></p>
+<ul><li><b>Prodotto al dettaglio:</b> 14 giorni, prodotto integro, rimborso PayPal entro 14 giorni dal rientro.</li>
+<li><b>Pacco sigillato:</b> reso entro 14 giorni se non aperto.</li>
+<li><b>Pacco aperto / Asta vinta:</b> NO reso per ripensamento. Sì rimborso se rotto, pericoloso o pezzi mancanti rispetto a quanto promesso.</li></ul>
+<h3>Richiedi reso</h3><input placeholder="Numero ordine"><input placeholder="Email"><select><option>Ripensamento pacco sigillato</option><option>Prodotto rotto</option><option>Prodotto sbagliato</option><option>Pezzi mancanti</option></select><label><input type="checkbox" style="width:auto"> Confermo pacco ancora sigillato</label><button onclick="alert('Richiesta reso inviata. Ti mandiamo codice reso e indirizzo.')">Invia richiesta reso</button></section>
+<section id="feedback"><h2>⭐ Feedback - 4.7 / 5</h2><p>Lascia una recensione con stelle, motivazione e foto max 1MB. Admin risponde a tutte.</p>
+<label>Stelle</label><select id="stars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
+<input placeholder="Titolo"><textarea placeholder="Motivazione: cosa ti è piaciuto? Cosa miglioreresti?"></textarea>
+<label>Foto max 1MB - JPG / PNG / WEBP</label><input type="file" id="photo" accept=".jpg,.jpeg,.png,.webp"><div id="photoMsg"></div>
+<button onclick="sendFeedback()">Pubblica recensione (in attesa di moderazione)</button><div id="fbList"></div></section>
+<section id="checkout"><h2>🛒 Checkout</h2><p>Carrello: <b id="cart">Nessun prodotto</b> • Totale: <b id="total">0€</b></p>
+<label>Scegli il corriere</label><select id="courier"><option>GLS 24/48h - 5,90€ (consigliato Natale)</option><option>BRT 24/48h - 6,90€</option><option>Poste Italiane 3-7 giorni - 4,90€</option><option>InPost Locker 24/7 - 4,50€</option><option>DHL Express - 9,90€</option><option>UPS - 8,90€</option></select>
+<input placeholder="Nome e cognome"><input placeholder="Indirizzo completo"><button onclick="alert('In produzione qui si apre PayPal Checkout con il tuo Client ID. Configuralo in Admin > Impostazioni.')">Paga con PayPal</button></section>
+<section id="admin" class="admin"><h2>🔐 Admin REBOX</h2><p>Collega qui Supabase + PayPal. In produzione questi dati vanno nelle variabili Netlify.</p>
+<label>Supabase URL</label><input id="sbUrl" placeholder="https://tuo-progetto.supabase.co">
+<label>Supabase Anon Key (solo pubblica, mai Secret)</label><input id="sbKey" placeholder="anon public key">
+<label>PayPal Client ID</label><input id="ppId" placeholder="Client ID PayPal Live">
+<button onclick="saveAdmin()">Salva collegamenti</button><p id="adminMsg"></p>
+<h3>Stock</h3><table><tr><th>Prodotto</th><th>Stock</th><th>Stato</th></tr><tr><td>Pacco Piccolo</td><td>48</td><td>Disponibile</td></tr><tr><td>Pacco Medio</td><td>42</td><td>Disponibile</td></tr><tr><td>Pacco Grande</td><td>28</td><td>Disponibile</td></tr><tr><td>Trapano avvitatore</td><td>0</td><td><b>ESAURITO</b></td></tr></table>
+<p><b>Checklist Netlify:</b> 1. Repo GitHub rebox 2. Netlify > Import > GitHub 3. Build: npm run build / Publish: dist (o vuoto / . se solo HTML) 4. Env: VITE_SUPABASE_URL, VITE_SUPABASE_ANON_KEY, VITE_PAYPAL_CLIENT_ID</p></section>
+</div><footer>REBOX • Resi • Stock • Casa • © 2026 • Termini • Privacy • Resi e Rimborsi • Contenuto non verificato singolarmente, marca/modello non garantiti.</footer>
+<script>
+let cart=[],total=0,curBid=45;
+const prods=[{n:"Trapano avvitatore",o:89,p:29,s:0},{n:"Cuffie wireless",o:79,p:25,s:12},{n:"Set pentole",o:120,p:39,s:8},{n:"Friggitrice ad aria",o:149,p:49,s:5}];
+document.getElementById('products').innerHTML=prods.map(x=>`<div class="card"><h3>${x.n}</h3><span class="old">${x.o}€</span> <span class="price">${x.p}€</span><p>Disponibili: ${x.s} ${x.s<=5&&x.s>0?'<b style="color:#FF7A00">Ultimi pezzi!</b>':''}</p>${x.s==0?'<div class="out">ESAURITO</div>':'<button onclick="buy(\''+x.n+'\','+x.p+')">Aggiungi</button>'}</div>`).join('');
+function buy(n,p){cart.push(n);total+=p;document.getElementById('cart').textContent=cart.join(', ');document.getElementById('total').textContent=total+'€';alert(n+' aggiunto al carrello');}
+function bid(){curBid+=5;document.getElementById('bid').textContent=curBid+'€';}
+function showYT(){let u=document.getElementById('yt').value;let id='';if(u.includes('v='))id=u.split('v=')[1].split('&')[0];else if(u.includes('youtu.be/'))id=u.split('youtu.be/')[1].split('?')[0];if(!id){alert('Incolla un link YouTube valido');return;}document.getElementById('ytbox').innerHTML='<iframe width="100%" height="315" src="https://www.youtube.com/embed/'+id+'" frameborder="0" allowfullscreen></iframe>';}
+document.getElementById('photo').addEventListener('change',e=>{let f=e.target.files[0];if(!f)return;if(f.size>1048576){document.getElementById('photoMsg').innerHTML='<b style="color:red">Foto troppo grande: max 1MB. Comprimila e riprova.</b>';e.target.value='';return;}document.getElementById('photoMsg').textContent='Foto caricata: '+f.name+' - '+(f.size/1024/1024).toFixed(2)+'MB';});
+function sendFeedback(){alert('Recensione inviata in attesa di moderazione Admin. Grazie!');}
+function saveAdmin(){localStorage.setItem('sbUrl',document.getElementById('sbUrl').value);localStorage.setItem('sbKey',document.getElementById('sbKey').value);localStorage.setItem('ppId',document.getElementById('ppId').value);document.getElementById('adminMsg').textContent='Collegamenti salvati! Ora il sito è pronto a usare Supabase + PayPal.';}
+</script></body></html>

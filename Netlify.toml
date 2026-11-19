@@ -1,0 +1,18 @@
+# REBOX - Netlify config
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Se il tuo progetto è solo HTML statico (senza build), usa:
+# command = ""
+# publish = "."
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "SAMEORIGIN"
