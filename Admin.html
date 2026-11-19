@@ -29,7 +29,7 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 .box-card .box-badge2{position:absolute;top:12px;right:12px;background:#00A88F;color:#fff;padding:6px 12px;border-radius:999px;font-weight:900;font-size:13px}
 .box-price{font-size:32px!important;color:#FF7A00}
 </style>
-</head><body><div style="background:#111;color:#fff;padding:10px;text-align:center;font-weight:900">🔐 PAGINA ADMIN SEGRETA - NON CONDIVIDERE QUESTO LINK - <a href="index.html" style="color:#FF7A00">Torna al sito</a></div>
+<script src="config.js"></script></head><body><div style="background:#111;color:#fff;padding:10px;text-align:center;font-weight:900">🔐 PAGINA ADMIN SEGRETA - NON CONDIVIDERE QUESTO LINK - <a href="index.html" style="color:#FF7A00">Torna al sito</a></div>
 
 <div id="accountBar" style="background:#00A88F;color:#fff;padding:10px 20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:700">
 <span id="accountStatus">👤 Non sei registrato - Per fare un'offerta all'asta devi registrarti</span>
@@ -519,7 +519,7 @@ function saveBoxStock(which){
   let val = parseInt(document.getElementById('input'+which).value);
   if(isNaN(val) || val<0){ alert('Scrivi un numero valido, es: 30'); return; }
   boxStocks[which]=val;
-  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks));
+  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks)); saveBoxStocksToCloud();
   renderBoxStocks();
   document.getElementById('boxStockMsg').textContent='✅ Pacco '+which+' aggiornato a '+val+'! Ora nel negozio si vede '+val+'.';
 }
@@ -527,7 +527,7 @@ function decrementBoxStock(name){
   if(name.includes('Piccolo') && boxStocks.Piccolo>0) boxStocks.Piccolo--;
   if(name.includes('Medio') && boxStocks.Medio>0) boxStocks.Medio--;
   if(name.includes('Grande') && boxStocks.Grande>0) boxStocks.Grande--;
-  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks));
+  localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks)); saveBoxStocksToCloud();
   renderBoxStocks();
 }
 document.addEventListener('DOMContentLoaded', renderBoxStocks);
@@ -684,6 +684,33 @@ document.addEventListener('change', function(e){
     r.readAsDataURL(f);
   }
 });
+
+// --- SYNC QUANTITATIVI PC <-> TELEFONO via Supabase ---
+async function syncBoxStocksFromCloud(){
+  try{
+    let url = localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key = localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key) return;
+    let r = await fetch(url+'/rest/v1/rebox_settings?id=eq.box_stocks', {headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    let j = await r.json();
+    if(j && j[0] && j[0].value){
+      boxStocks = j[0].value;
+      localStorage.setItem('reboxBoxStocks', JSON.stringify(boxStocks)); saveBoxStocksToCloud();
+      if(typeof renderBoxStocks==='function') renderBoxStocks();
+      if(typeof renderBoxes==='function') renderBoxes();
+    }
+  }catch(e){ console.log('sync cloud errore',e); }
+}
+async function saveBoxStocksToCloud(){
+  try{
+    let url = localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key = localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key) return;
+    await fetch(url+'/rest/v1/rebox_settings', {method:'POST', headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'}, body: JSON.stringify({id:'box_stocks', value: boxStocks})});
+  }catch(e){ console.log('save cloud errore',e); }
+}
+// All'avvio, prova a prendere i quantitativi veri da Supabase
+document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFromCloud, 800); });
 </script>
 <div id="cartBar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#FF7A00;color:#071A33;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:900;box-shadow:0 -4px 20px rgba(0,0,0,.4);font-size:16px">
 <span>🛒 <span id="cartBarText">Carrello vuoto</span> • Totale: <span id="cartBarTotal" style="font-size:20px">0€</span></span>
