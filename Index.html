@@ -691,9 +691,32 @@ function decrementBoxStock(name){
 document.addEventListener('DOMContentLoaded', renderBoxStocks);
 
 var auctions = JSON.parse(localStorage.getItem('reboxAuctions')||'[]'); // PUBBLICO - Niente aste esempio. Se Admin cancella, qui resta vuoto.
-function saveAuctions(){ localStorage.setItem('reboxAuctions', JSON.stringify(auctions)); }
+
+async function saveAuctionsToCloud(){
+  try{
+    var url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    var key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return false;
+    var r=await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'auctions',value:auctions})});
+    return r.ok;
+  }catch(e){ console.log('save aste cloud',e); return false; }
+}
+
+function saveAuctions(){ localStorage.setItem('reboxAuctions', JSON.stringify(auctions)); saveAuctionsToCloud(); }
+
+async function saveUsersToCloud(){
+  try{
+    var url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    var key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return;
+    var _users=JSON.parse(localStorage.getItem('reboxUsers')||'[]');
+    await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'users',value:_users})});
+  }catch(e){ console.log('save utenti cloud',e); }
+}
+
 async function loadAuctionsFromCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.auctions',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let j=await r.json(); if(j&&j[0]&&Array.isArray(j[0].value)){ auctions=j[0].value; localStorage.setItem('reboxAuctions',JSON.stringify(auctions)); renderAuctions(); } }catch(e){ console.log('load aste cloud',e); } }
 document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadAuctionsFromCloud,800); });
+var auctionSyncInterval=setInterval(function(){ if(typeof loadAuctionsFromCloud==='function') loadAuctionsFromCloud(); }, 10000);
 function fmtTime(ms){
   if(ms<=0) return 'CHIUSA';
   let s=Math.floor(ms/1000); let h=Math.floor(s/3600); let m=Math.floor((s%3600)/60); let sec=s%60;
@@ -721,8 +744,11 @@ function renderAuctions(){
     </div>`;
   }).join('')+'</div>';
 }
-function placeBid(i){
+async function placeBid(i){
   if(!requireLoginForBid()) return;
+  try{ await loadAuctionsFromCloud(); }catch(e){}
+  // Dopo il ricaricamento, ritrova l'asta per id (l'indice potrebbe essere cambiato)
+  if(auctions[i] && auctions[i].id && window._lastBidAuctionId){ var _found=auctions.findIndex(function(x){return x.id===window._lastBidAuctionId;}); if(_found!==-1) i=_found; }
 
   let a=auctions[i];
   if(a.closed){ alert('Asta chiusa!'); return; }
@@ -731,7 +757,7 @@ function placeBid(i){
   a.bid+=5;
   a.bids.push({who:name, amt:a.bid, when:'ora', email: currentUser?currentUser.email:'', phone: currentUser?currentUser.phone:''});
   saveAuctions(); renderAuctions(); renderAdminAuctions();
-  alert(name+', la tua offerta di '+a.bid+'€ è registrata! Sei il più alto per ora. La vedi nella lista Ultime 3 offerte.');
+  await saveAuctionsToCloud(); alert(name+', la tua offerta di '+a.bid+'€ è registrata e sincronizzata! Ora la vedono anche da altri PC e telefoni. Sei il più alto per ora.');
 }
 function setAuctionYT(i){
   let v=document.getElementById('ytInput'+i).value.trim();
@@ -810,7 +836,7 @@ function doRegister(){
     currentUser=existing;
   } else {
     let nu={name:name,email:email,phone:phone,pass:pass,created:new Date().toLocaleString('it-IT')};
-    allUsers.push(nu); localStorage.setItem('reboxUsers', JSON.stringify(allUsers));
+    allUsers.push(nu); localStorage.setItem('reboxUsers', JSON.stringify(allUsers)); saveUsersToCloud();
     currentUser=nu;
   }
   localStorage.setItem('reboxCurrentUser', JSON.stringify(currentUser));
