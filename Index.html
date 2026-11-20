@@ -102,12 +102,7 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <section id="resi"><h2>↩️ Resi e Rimborsi</h2><p><b>Reso facile: 14 giorni se il pacco è ancora sigillato. Se lo apri, hai accettato la sorpresa. Se qualcosa è rotto o manca, ti rimborsiamo noi.</b></p>
 <ul><li><b>Prodotto al dettaglio:</b> 14 giorni, prodotto integro, rimborso PayPal entro 14 giorni dal rientro.</li><li><b>Pacco sigillato:</b> reso entro 14 giorni se non aperto.</li><li><b>Pacco aperto / Asta vinta:</b> NO reso per ripensamento. Sì rimborso se rotto, pericoloso o pezzi mancanti.</li></ul>
 <h3>Richiedi reso</h3><input placeholder="Numero ordine"><input placeholder="Email"><select><option>Ripensamento pacco sigillato</option><option>Prodotto rotto</option><option>Prodotto sbagliato</option><option>Pezzi mancanti</option></select><label><input type="checkbox" style="width:auto"> Confermo pacco ancora sigillato</label><button onclick="alert('Richiesta reso inviata. Ti mandiamo codice reso e indirizzo.')">Invia richiesta reso</button></section>
-<section id="feedback"><h2>⭐ Feedback - 4.7 / 5 • 1.284 recensioni</h2><p>Lascia una recensione con stelle, motivazione e foto max 1MB. Admin risponde a tutte.</p>
-<div class="grid"><p style="opacity:.7">Nessuna recensione esempio. Le recensioni vere dei tuoi clienti appariranno qui.</p></div>
-<label>Stelle</label><select id="stars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select>
-<input placeholder="Titolo"><textarea placeholder="Motivazione: cosa ti è piaciuto? Cosa miglioreresti?"></textarea>
-<label>Foto max 1MB - JPG / PNG / WEBP</label><input type="file" id="photo" accept=".jpg,.jpeg,.png,.webp"><div id="photoMsg"></div>
-<button onclick="sendFeedback()">Pubblica recensione</button></section>
+<section id="feedback"><h2>⭐ Feedback</h2><div id="feedbackList"><p style="opacity:.7">Nessuna recensione ancora. Sarai il primo a lasciarla.</p></div><h3 style="margin-top:16px">Lascia una recensione</h3><label>Il tuo nome</label><input id="fbName" placeholder="Il tuo nome"><label>Stelle</label><select id="stars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><label>Titolo</label><input id="fbTitle" placeholder="Titolo"><label>Motivazione</label><textarea id="fbText" placeholder="Cosa ti è piaciuto? Cosa miglioreresti?"></textarea><label>Foto max 1MB - JPG / PNG / WEBP</label><input type="file" id="photo" accept=".jpg,.jpeg,.png,.webp"><div id="photoMsg"></div><p id="fbMsg" style="font-weight:800;color:#00A88F"></p><button onclick="sendFeedback()">Pubblica recensione</button></section>
 <section id="checkout"><h2>🛒 Checkout - Qui paghi</h2>
 <div style="background:#FFF3E6;padding:16px;border-radius:14px">
 <p><b>Quello che stai pagando:</b></p>
@@ -407,6 +402,67 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });
 
 document.addEventListener('DOMContentLoaded', ()=>{ renderNewProducts(); });
+
+var feedbacks = [];
+function renderFeedback(){
+  var el=document.getElementById('feedbackList'); if(!el) return;
+  if(!feedbacks || feedbacks.length===0){ el.innerHTML='<p style="opacity:.7">Nessuna recensione ancora. Sarai il primo a lasciarla.</p>'; return; }
+  el.innerHTML = feedbacks.slice().reverse().map(function(f){
+    var stars = '⭐'.repeat(parseInt(f.stars||5));
+    var photo = f.photo ? '<br><img src="'+f.photo+'" style="width:120px;height:120px;object-fit:cover;border-radius:10px;margin-top:6px">' : '';
+    var reply = f.reply ? '<div style="background:#FFF3E6;padding:10px;border-radius:10px;margin-top:8px"><b>REBOX risponde:</b> '+String(f.reply).replace(/</g,'&lt;')+'</div>' : '';
+    return '<div style="background:#fff;padding:12px;border-radius:12px;margin:8px 0;border:1px solid #eee"><b>'+String(f.name||'Cliente').replace(/</g,'&lt;')+'</b> - '+stars+'<br><b>'+String(f.title||'').replace(/</g,'&lt;')+'</b><br>'+String(f.text||'').replace(/</g,'&lt;')+photo+reply+'</div>';
+  }).join('');
+}
+async function saveFeedbackToCloud(){
+  try{
+    var url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    var key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return;
+    await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:'feedback',value:feedbacks})});
+  }catch(e){ console.log('save feedback cloud',e); }
+}
+async function loadFeedbackFromCloud(){
+  try{
+    var url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    var key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return;
+    var r=await fetch(url+'/rest/v1/rebox_settings?id=eq.feedback',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    var j=await r.json();
+    if(j&&j[0]&&Array.isArray(j[0].value)){ feedbacks=j[0].value; localStorage.setItem('reboxFeedback',JSON.stringify(feedbacks)); renderFeedback(); }
+  }catch(e){ console.log('load feedback cloud',e); }
+}
+function sendFeedback(){
+  var nameEl=document.getElementById('fbName');
+  var titleEl=document.getElementById('fbTitle');
+  var textEl=document.getElementById('fbText');
+  var starsEl=document.getElementById('stars');
+  var msg=document.getElementById('fbMsg');
+  var name=nameEl?nameEl.value.trim():'';
+  var title=titleEl?titleEl.value.trim():'';
+  var text=textEl?textEl.value.trim():'';
+  if(!name){ if(msg) msg.textContent='Scrivi il tuo nome.'; if(nameEl) nameEl.focus(); return; }
+  if(!text){ if(msg) msg.textContent='Scrivi la motivazione della recensione.'; if(textEl) textEl.focus(); return; }
+  var fileInput=document.getElementById('photo');
+  var file=fileInput&&fileInput.files?fileInput.files[0]:null;
+  if(file && file.size>1048576){ alert('Foto troppo grande: max 1MB.'); return; }
+  var done=function(photoData){
+    feedbacks.push({name:name,title:title,text:text,stars:starsEl?starsEl.value:'5',photo:photoData||'',date:new Date().toISOString(),reply:''});
+    localStorage.setItem('reboxFeedback',JSON.stringify(feedbacks));
+    saveFeedbackToCloud();
+    renderFeedback();
+    if(titleEl) titleEl.value=''; if(textEl) textEl.value=''; if(nameEl) nameEl.value=''; if(fileInput) fileInput.value='';
+    if(msg) msg.textContent='Grazie! La tua recensione è stata pubblicata.';
+    alert('Grazie! La tua recensione è stata pubblicata.');
+  };
+  if(file){
+    var reader=new FileReader();
+    reader.onload=function(e){ done(e.target.result); };
+    reader.readAsDataURL(file);
+  } else { done(''); }
+}
+try{ feedbacks = JSON.parse(localStorage.getItem('reboxFeedback')||'[]'); }catch(e){ feedbacks=[]; }
+document.addEventListener('DOMContentLoaded', function(){ renderFeedback(); setTimeout(loadFeedbackFromCloud, 900); });
 
 function renderShop(){
   let grid=document.getElementById('shopGrid');
