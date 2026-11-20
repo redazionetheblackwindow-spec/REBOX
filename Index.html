@@ -70,7 +70,7 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <p style="font-size:12px">I tuoi dati servono solo per: avvisarti se vinci un'asta, mandarti conferma ordine, contattarti per spedizione. Non li vendiamo.</p>
 </div>
 </div>
-<div class="top">🎄 NATALE: Ordina entro il 18 dicembre • No coda, no freddo, no stress • 3,2,1 ONLINE • Spedizione gratis sopra 59€</div>
+<div class="top">🎄 NATALE: Ordina entro il 18 dicembre • No coda, no freddo, no stress • 3,2,1 ONLINE • Spedizione gratis sopra 80€</div>
 <header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div>
 <nav><a href="#negozio">Negozio</a><a href="#pacchi">Pacchi</a><a href="#aste">Aste 3,2,1</a><a href="#resi">Resi</a><a href="#feedback">Feedback</a></nav></header>
 
@@ -116,7 +116,25 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <option value="9.90">DHL Express - 9,90€</option>
 <option value="8.90">UPS - 8,90€</option>
 </select>
-<p id="freeShipMsg" style="font-weight:800;color:#00A88F"></p>
+<div style="background:#fff;padding:14px;border-radius:12px;margin:14px 0">
+<h3 style="margin:0 0 8px">Costi di spedizione</h3>
+<p style="font-size:13px;margin:0 0 10px">Il costo cambia in base alla grandezza del pacco. Sopra <b>80€</b> di prodotti la spedizione è <b>gratis</b>, anche per il pacco grande.</p>
+<div style="overflow-x:auto">
+<table style="width:100%;border-collapse:collapse;font-size:14px;min-width:520px">
+<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #eee">Corriere</th><th style="text-align:center;padding:8px;border-bottom:2px solid #eee">Standard / Piccolo</th><th style="text-align:center;padding:8px;border-bottom:2px solid #eee">Medio<br><small>+ 4€</small></th><th style="text-align:center;padding:8px;border-bottom:2px solid #eee">Grande 80x60x40<br><small>+ 12€</small></th></tr></thead>
+<tbody>
+<tr><td style="padding:8px;border-bottom:1px solid #eee">GLS 24/48h</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">5,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">9,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>17,90€</b></td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #eee">BRT 24/48h</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">6,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">10,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>18,90€</b></td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #eee">Poste Italiane 3-7 giorni</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">4,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">8,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>16,90€</b></td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #eee">InPost Locker 24/7</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">4,50€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">8,50€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>16,50€</b></td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #eee">DHL Express</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">9,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">13,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>21,90€</b></td></tr>
+<tr><td style="padding:8px;border-bottom:1px solid #eee">UPS</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">8,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">12,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>20,90€</b></td></tr>
+</tbody>
+</table>
+</div>
+<p style="font-size:13px;margin:8px 0 0">Pacco grande = 80cm x 60cm x 40cm, ingombrante, peso non stimabile. Pacco medio = supplemento 4€.</p>
+</div>
+<p id="shipDetail" style="font-size:13px;color:#555;margin:4px 0"></p><p id="freeShipMsg" style="font-weight:800;color:#00A88F"></p>
 <input id="custName" placeholder="Nome e cognome *">
 <input id="custAddr" placeholder="Indirizzo completo *">
 <input id="custEmail" placeholder="Email per conferma ordine *">
@@ -509,11 +527,38 @@ function updateCartUI(){
   let t = document.getElementById('total'); if(t) t.textContent = total.toFixed(2)+'€';
   updateCheckout();
 }
+
+// SPEDIZIONE IN BASE ALLA GRANDEZZA DEL PACCO
+// Piccolo / prodotti normali = prezzo corriere scelto
+// Medio = corriere + 4 euro
+// Grande 80x60x40 (peso non stimabile, ingombrante) = corriere + 12 euro
+// Sopra 80 euro di prodotti = spedizione GRATIS anche se pacco grande
+function cartHasLarge(){
+  return cartItems.some(function(x){ var n=(x.name||'').toLowerCase(); return n.indexOf('grande')!==-1 || n.indexOf('large')!==-1 || n.indexOf('80x60')!==-1 || n.indexOf('80cm')!==-1 || n.indexOf('pacco sorpresa')!==-1 || n.indexOf('asta')!==-1; });
+}
+function cartHasMedium(){
+  return cartItems.some(function(x){ var n=(x.name||'').toLowerCase(); return n.indexOf('medio')!==-1 || n.indexOf('medium')!==-1; });
+}
+function getShippingCost(total, baseShip){
+  if(cartItems.length===0) return 0;
+  if(total>=80) return 0;
+  if(cartHasLarge()) return baseShip + 12;
+  if(cartHasMedium()) return baseShip + 4;
+  return baseShip;
+}
+function getShippingLabel(total, baseShip){
+  if(cartItems.length===0) return '';
+  if(total>=80) return 'Spedizione GRATIS - sopra 80 euro, anche per pacco grande';
+  if(cartHasLarge()) return 'Pacco GRANDE 80x60x40 - ingombrante, peso non stimabile: corriere + 12 euro di supplemento';
+  if(cartHasMedium()) return 'Pacco MEDIO: corriere + 4 euro di supplemento';
+  return 'Pacco standard: prezzo corriere scelto';
+}
+
 function updateCheckout(){
   let total = cartTotal();
   let shipSel = document.getElementById('courier');
   let ship = shipSel ? parseFloat(shipSel.value) : 0;
-  if(total>=59) ship=0;
+  ship = getShippingCost(total, ship);
   if(cartItems.length===0) ship=0;
   let finalTotal = total + ship;
   let list = document.getElementById('checkoutList');
@@ -524,7 +569,8 @@ function updateCheckout(){
   let st=document.getElementById('checkoutSubtotal'); if(st) st.textContent=total.toFixed(2)+'€';
   let sh=document.getElementById('checkoutShip'); if(sh) sh.textContent=ship.toFixed(2)+'€';
   let ft=document.getElementById('checkoutTotal'); if(ft) ft.textContent=finalTotal.toFixed(2)+'€';
-  let fm=document.getElementById('freeShipMsg'); if(fm) fm.textContent = total>=59 ? '✅ Spedizione GRATIS sbloccata! Sopra 59€ non paghi corriere.' : (total>0 ? 'Mancano '+(59-total).toFixed(2)+'€ per spedizione gratis' : '');
+  let fm=document.getElementById('freeShipMsg'); if(fm) fm.textContent = total>=80 ? '✅ Spedizione GRATIS sbloccata! Sopra 80€ non paghi corriere, nemmeno per pacco grande.' : (total>0 ? 'Mancano '+(80-total).toFixed(2)+'€ per spedizione gratis' : '');
+  let sd=document.getElementById('shipDetail'); if(sd) sd.textContent = getShippingLabel(total, shipSel ? parseFloat(shipSel.value) : 0);
   renderPayPal();
 }
 
@@ -557,7 +603,7 @@ function loadPayPalSDK(){
   let total = cartTotal();
   let shipSel = document.getElementById('courier');
   let ship = shipSel ? parseFloat(shipSel.value) : 0;
-  if(total>=59) ship=0;
+  ship = getShippingCost(total, ship);
   if(cartItems.length===0) ship=0;
   let finalTotal = (total+ship).toFixed(2);
   if(cartItems.length===0){
