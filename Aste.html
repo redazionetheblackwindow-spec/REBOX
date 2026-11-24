@@ -89,7 +89,7 @@ header nav a:hover{background:#FF7A00;color:#071A33}
 </div>
 
 <div class="top">🎄 NATALE: Ordina entro il 18 dicembre • No coda, no freddo, no stress • 3,2,1 ONLINE • Spedizione gratis sopra 80€</div>
-<header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div><nav><a href="index.html">Home</a><a href="negozio.html">Negozio</a><a href="lotti.html">Lotti</a><a href="pacchi.html">Pacchi</a><a href="aste.html">Aste 3,2,1</a><a href="chi-siamo.html">Chi siamo</a><a href="resi.html">Resi</a><a href="feedback.html">Feedback</a></nav></header>
+<header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div><nav><a href="index.html">Home</a><a href="negozio.html">Negozio</a><a href="lotti.html">Lotti</a><a href="pacchi.html">Pacchi</a><a href="aste.html">Aste 3,2,1</a><a href="chi-siamo.html">Chi siamo</a><a href="resi.html">Resi</a><a href="feedback.html">Feedback</a><a href="checkout.html">🛒 Checkout</a></nav></header>
 <div class="wrap"><div class="promo">🔥 Aste 3,2,1 - fai la tua offerta, vinci da casa tua.</div><section id="aste"><h2>🔥 Aste 3,2,1 Online</h2><p><b>3 • 2 • 1 • da casa tua!</b> Guarda il teaser YouTube, fai la tua offerta, vinci senza coda sotto il sole, sotto l'acqua, al freddo e al gelo.</p>
 <div id="auctionsGrid"></div>
 </section></div>
@@ -488,9 +488,9 @@ document.addEventListener('DOMContentLoaded', ()=>{ renderShop(); });
 function saveCart(){ localStorage.setItem('reboxCart', JSON.stringify(cartItems)); }
 function cartTotal(){ return cartItems.reduce((s,x)=>s+x.price,0); }
 
-function clearCart(){ if(typeof reboxApplySoldItems==='function') reboxApplySoldItems(cartItems); cartItems=[]; saveCart(); updateCartUI(); }
+function clearCart(){ if(!confirm('Svuoti tutto il carrello?')) return; cartItems=[]; saveCart(); updateCartUI(); }
 function removeItem(i){ cartItems.splice(i,1); saveCart(); updateCartUI(); }
-function scrollToCheckout(){ document.getElementById('checkout').scrollIntoView({behavior:'smooth'}); }
+function scrollToCheckout(){ var el=document.getElementById('checkout'); if(el){ el.scrollIntoView({behavior:'smooth'}); } else { window.location.href='checkout.html'; } }
 function updateCartUI(){
   let total = cartTotal();
   let txt = cartItems.length===0 ? 'Vuoto' : cartItems.map(x=>x.name).join(', ');
@@ -537,7 +537,7 @@ function updateCheckout(){
   let list = document.getElementById('checkoutList');
   if(list){
     if(cartItems.length===0) list.innerHTML='Carrello vuoto - Aggiungi un prodotto da Negozio o un Pacco.';
-    else list.innerHTML = cartItems.map((x,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span>${x.name}</span><span><b>${x.price.toFixed(2)}€</b> <button onclick="removeItem(${i})" style="background:#d32f2f;color:#fff;padding:4px 10px">X</button></span></div>`).join('');
+    else reboxRenderCheckoutList(list);
   }
   let st=document.getElementById('checkoutSubtotal'); if(st) st.textContent=total.toFixed(2)+'€';
   let sh=document.getElementById('checkoutShip'); if(sh) sh.textContent=ship.toFixed(2)+'€';
@@ -1139,5 +1139,50 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
 // Wrap renderAdminList per aggiungere bottone "Segna venduto" su ogni prodotto (senza toccare la funzione originale)
 (function(){ var _origRAL = window.renderAdminList; if(typeof _origRAL!=='function') return; window.renderAdminList = function(){ _origRAL(); try{ var el=document.getElementById('adminProductList'); if(!el) return; var rows = el.querySelectorAll('div'); rows.forEach(function(row, idx){ if(row.querySelector('[data-rebox-sold]')) return; var btns = row.querySelector('span:last-child'); if(!btns) return; var b=document.createElement('button'); b.setAttribute('data-rebox-sold','1'); b.textContent='Segna venduto'; b.style.cssText='background:#333;color:#fff;margin-left:4px'; b.onclick=function(){ if(typeof reboxMarkProductSold==='function') reboxMarkProductSold(idx); }; btns.appendChild(b); }); }catch(e){} }; })();
 
+</script>
+
+<script>
+/* REBOX checkout: quantità raggruppate + / - / elimina */
+function reboxCartGroups(){
+  var map={}, out=[];
+  (window.cartItems||[]).forEach(function(it){
+    var key=(it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price;
+    if(!map[key]){ map[key]={key:key,name:it.name,price:it.price,qty:0,kind:it.kind||'product',lotId:it.lotId,productId:it.productId}; out.push(map[key]); }
+    map[key].qty++;
+  });
+  return out;
+}
+function reboxRenderCheckoutList(list){
+  var groups=reboxCartGroups();
+  if(!groups.length){ list.innerHTML='Carrello vuoto - Aggiungi un prodotto da Negozio, un Lotto o un Pacco.'; return; }
+  list.innerHTML = groups.map(function(g){
+    var k=g.key.replace(/'/g,"\\'");
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #eee;flex-wrap:wrap"><span><b>'+String(g.name).replace(/</g,'&lt;')+'</b><br><small>'+g.price.toFixed(2)+'€ cad.</small></span><span style="display:flex;gap:6px;align-items:center"><button onclick="changeCartQty(\''+k+'\',-1)" style="width:32px;padding:6px">-</button><b>'+g.qty+'</b><button onclick="changeCartQty(\''+k+'\',1)" style="width:32px;padding:6px">+</button><b>'+(g.price*g.qty).toFixed(2)+'€</b><button onclick="removeCartGroup(\''+k+'\')" style="background:#d32f2f;color:#fff;padding:6px 10px">Elimina</button></span></div>';
+  }).join('');
+}
+function changeCartQty(key, delta){
+  var groups=reboxCartGroups();
+  var g=groups.find(function(x){ return x.key===key; }); if(!g) return;
+  if(delta>0){
+    if(g.kind==='lot'){ alert('Un lotto è unico, non puoi metterne 2 uguali.'); return; }
+    if(g.productId){
+      var p=(window.adminProducts||[]).find(function(x){ return x._id===g.productId; });
+      if(p && g.qty+1>parseInt(p.stock||0)){ alert('Disponibili solo '+p.stock+' pezzi di '+p.name+'.'); return; }
+    }
+    var src=(window.cartItems||[]).find(function(it){ return (it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price===key; });
+    if(src) window.cartItems.push({name:src.name, price:src.price, kind:src.kind, lotId:src.lotId, productId:src.productId});
+  } else {
+    var idx=(window.cartItems||[]).findIndex(function(it){ return (it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price===key; });
+    if(idx>=0) window.cartItems.splice(idx,1);
+  }
+  if(typeof saveCart==='function') saveCart();
+  if(typeof updateCartUI==='function') updateCartUI();
+}
+function removeCartGroup(key){
+  if(!confirm('Togli dal carrello?')) return;
+  window.cartItems=(window.cartItems||[]).filter(function(it){ return (it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price!==key; });
+  if(typeof saveCart==='function') saveCart();
+  if(typeof updateCartUI==='function') updateCartUI();
+}
 </script>
 </body></html>

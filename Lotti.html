@@ -89,47 +89,8 @@ header nav a:hover{background:#FF7A00;color:#071A33}
 </div>
 
 <div class="top">🎄 NATALE: Ordina entro il 18 dicembre • No coda, no freddo, no stress • 3,2,1 ONLINE • Spedizione gratis sopra 80€</div>
-<header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div><nav><a href="index.html">Home</a><a href="negozio.html">Negozio</a><a href="lotti.html">Lotti</a><a href="pacchi.html">Pacchi</a><a href="aste.html">Aste 3,2,1</a><a href="chi-siamo.html">Chi siamo</a><a href="resi.html">Resi</a><a href="feedback.html">Feedback</a></nav></header>
-<div class="wrap"><div class="promo">📦 Lotti REBOX - più prodotti insieme, prezzo unico.</div><section id="lotti"><h2>📦 Lotti REBOX - Più prodotti insieme</h2><p>Ogni lotto contiene i prodotti elencati. <b>Se compri un lotto, i prodotti dentro si tolgono dalla vendita singola. Se compri un singolo prodotto, il lotto che lo conteneva diventa non disponibile (appannato).</b> La foto del lotto è verticale.</p><div id="lotsGrid"></div></section><section id="checkout"><h2>🛒 Checkout - Qui paghi</h2>
-<div style="background:#FFF3E6;padding:16px;border-radius:14px">
-<p><b>Quello che stai pagando:</b></p>
-<div id="checkoutList" style="background:#fff;padding:12px;border-radius:10px">Carrello vuoto - Aggiungi un prodotto da Negozio o un Pacco.</div>
-<p>Prodotti: <b id="checkoutSubtotal">0€</b> • Corriere: <b id="checkoutShip">0€</b> • <b>Totale da pagare: <span id="checkoutTotal" style="font-size:24px;color:#FF7A00">0€</span></b></p>
-<label>Scegli il corriere - cambia il totale subito</label><select id="courier" onchange="updateCheckout()">
-<option value="5.90">GLS 24/48h - 5,90€ (consigliato Natale)</option>
-<option value="6.90">BRT 24/48h - 6,90€</option>
-<option value="4.90">Poste Italiane 3-7 giorni - 4,90€</option>
-<option value="4.50">InPost Locker 24/7 - 4,50€</option>
-<option value="9.90">DHL Express - 9,90€</option>
-<option value="8.90">UPS - 8,90€</option>
-</select>
-<div style="background:#fff;padding:14px;border-radius:12px;margin:14px 0">
-<h3 style="margin:0 0 8px">Costi di spedizione</h3>
-<p style="font-size:13px;margin:0 0 10px">Il costo cambia in base alla grandezza del pacco. Sopra <b>80€</b> di prodotti la spedizione è <b>gratis</b>, anche per il pacco grande.</p>
-<div style="overflow-x:auto">
-<table style="width:100%;border-collapse:collapse;font-size:14px;min-width:520px">
-<thead><tr><th style="text-align:left;padding:8px;border-bottom:2px solid #eee">Corriere</th><th style="text-align:center;padding:8px;border-bottom:2px solid #eee">Standard / Piccolo</th><th style="text-align:center;padding:8px;border-bottom:2px solid #eee">Medio<br><small>+ 4€</small></th><th style="text-align:center;padding:8px;border-bottom:2px solid #eee">Grande 80x60x40<br><small>+ 12€</small></th></tr></thead>
-<tbody>
-<tr><td style="padding:8px;border-bottom:1px solid #eee">GLS 24/48h</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">5,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">9,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>17,90€</b></td></tr>
-<tr><td style="padding:8px;border-bottom:1px solid #eee">BRT 24/48h</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">6,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">10,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>18,90€</b></td></tr>
-<tr><td style="padding:8px;border-bottom:1px solid #eee">Poste Italiane 3-7 giorni</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">4,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">8,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>16,90€</b></td></tr>
-<tr><td style="padding:8px;border-bottom:1px solid #eee">InPost Locker 24/7</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">4,50€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">8,50€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>16,50€</b></td></tr>
-<tr><td style="padding:8px;border-bottom:1px solid #eee">DHL Express</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">9,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">13,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>21,90€</b></td></tr>
-<tr><td style="padding:8px;border-bottom:1px solid #eee">UPS</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">8,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee">12,90€</td><td style="text-align:center;padding:8px;border-bottom:1px solid #eee"><b>20,90€</b></td></tr>
-</tbody>
-</table>
-</div>
-<p style="font-size:13px;margin:8px 0 0">Pacco grande = 80cm x 60cm x 40cm, ingombrante, peso non stimabile. Pacco medio = supplemento 4€.</p>
-</div>
-<p id="shipDetail" style="font-size:13px;color:#555;margin:4px 0"></p><p id="freeShipMsg" style="font-weight:800;color:#00A88F"></p>
-<input id="custName" placeholder="Nome e cognome *">
-<input id="custAddr" placeholder="Indirizzo completo *">
-<input id="custEmail" placeholder="Email per conferma ordine *">
-<div id="paypal-button-container" style="margin-top:12px"></div>
-<p id="checkoutMsg" style="font-weight:800"></p>
-<p style="font-size:12px">PayPal usa il Client ID che hai salvato in Admin. Se hai messo il Client ID <b>LIVE</b>, qui sotto appare il bottone PayPal vero e gli utenti pagano davvero. Se hai messo quello <b>Sandbox</b>, pagano solo soldi finti di prova. Se hai messo il Client ID Live, qui paghi davvero.</p>
-
-</div></section></div>
+<header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div><nav><a href="index.html">Home</a><a href="negozio.html">Negozio</a><a href="lotti.html">Lotti</a><a href="pacchi.html">Pacchi</a><a href="aste.html">Aste 3,2,1</a><a href="chi-siamo.html">Chi siamo</a><a href="resi.html">Resi</a><a href="feedback.html">Feedback</a><a href="checkout.html">🛒 Checkout</a></nav></header>
+<div class="wrap"><div class="promo">📦 Lotti REBOX - più prodotti insieme, prezzo unico.</div><section id="lotti"><h2>📦 Lotti REBOX - Più prodotti insieme</h2><p>Ogni lotto contiene i prodotti elencati. <b>Se compri un lotto, i prodotti dentro si tolgono dalla vendita singola. Se compri un singolo prodotto, il lotto che lo conteneva diventa non disponibile (appannato).</b> La foto del lotto è verticale.</p><div id="lotsGrid"></div></section></div>
 <footer><div style="margin-bottom:14px"><b>Seguici</b><br><a href="https://www.youtube.com/@Rebox-italia" target="_blank" rel="noopener" style="display:inline-block;background:#FF0000;color:#fff;padding:12px 20px;border-radius:999px;font-weight:900;text-decoration:none;margin:6px">▶️ YouTube - @Rebox-italia</a> <a href="https://x.com/REBOXITALIA" target="_blank" rel="noopener" style="display:inline-block;background:#000;color:#fff;padding:12px 20px;border-radius:999px;font-weight:900;text-decoration:none;margin:6px">𝕏 X - @REBOXITALIA</a></div>REBOX • Resi • Stock • Casa • © 2026 • Termini • Privacy • Resi e Rimborsi • Contenuto non verificato singolarmente, marca/modello non garantiti.</footer>
 <div id="cartBar" style="position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#FF7A00;color:#071A33;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;font-weight:900;box-shadow:0 -4px 20px rgba(0,0,0,.4);font-size:16px">
 <span>🛒 <span id="cartBarText">Carrello vuoto</span> • Totale: <span id="cartBarTotal" style="font-size:20px">0€</span></span>
@@ -525,9 +486,9 @@ document.addEventListener('DOMContentLoaded', ()=>{ renderShop(); });
 function saveCart(){ localStorage.setItem('reboxCart', JSON.stringify(cartItems)); }
 function cartTotal(){ return cartItems.reduce((s,x)=>s+x.price,0); }
 
-function clearCart(){ if(typeof reboxApplySoldItems==='function') reboxApplySoldItems(cartItems); cartItems=[]; saveCart(); updateCartUI(); }
+function clearCart(){ if(!confirm('Svuoti tutto il carrello?')) return; cartItems=[]; saveCart(); updateCartUI(); }
 function removeItem(i){ cartItems.splice(i,1); saveCart(); updateCartUI(); }
-function scrollToCheckout(){ document.getElementById('checkout').scrollIntoView({behavior:'smooth'}); }
+function scrollToCheckout(){ var el=document.getElementById('checkout'); if(el){ el.scrollIntoView({behavior:'smooth'}); } else { window.location.href='checkout.html'; } }
 function updateCartUI(){
   let total = cartTotal();
   let txt = cartItems.length===0 ? 'Vuoto' : cartItems.map(x=>x.name).join(', ');
@@ -574,7 +535,7 @@ function updateCheckout(){
   let list = document.getElementById('checkoutList');
   if(list){
     if(cartItems.length===0) list.innerHTML='Carrello vuoto - Aggiungi un prodotto da Negozio o un Pacco.';
-    else list.innerHTML = cartItems.map((x,i)=>`<div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid #eee"><span>${x.name}</span><span><b>${x.price.toFixed(2)}€</b> <button onclick="removeItem(${i})" style="background:#d32f2f;color:#fff;padding:4px 10px">X</button></span></div>`).join('');
+    else reboxRenderCheckoutList(list);
   }
   let st=document.getElementById('checkoutSubtotal'); if(st) st.textContent=total.toFixed(2)+'€';
   let sh=document.getElementById('checkoutShip'); if(sh) sh.textContent=ship.toFixed(2)+'€';
@@ -1176,5 +1137,50 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
 // Wrap renderAdminList per aggiungere bottone "Segna venduto" su ogni prodotto (senza toccare la funzione originale)
 (function(){ var _origRAL = window.renderAdminList; if(typeof _origRAL!=='function') return; window.renderAdminList = function(){ _origRAL(); try{ var el=document.getElementById('adminProductList'); if(!el) return; var rows = el.querySelectorAll('div'); rows.forEach(function(row, idx){ if(row.querySelector('[data-rebox-sold]')) return; var btns = row.querySelector('span:last-child'); if(!btns) return; var b=document.createElement('button'); b.setAttribute('data-rebox-sold','1'); b.textContent='Segna venduto'; b.style.cssText='background:#333;color:#fff;margin-left:4px'; b.onclick=function(){ if(typeof reboxMarkProductSold==='function') reboxMarkProductSold(idx); }; btns.appendChild(b); }); }catch(e){} }; })();
 
+</script>
+
+<script>
+/* REBOX checkout: quantità raggruppate + / - / elimina */
+function reboxCartGroups(){
+  var map={}, out=[];
+  (window.cartItems||[]).forEach(function(it){
+    var key=(it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price;
+    if(!map[key]){ map[key]={key:key,name:it.name,price:it.price,qty:0,kind:it.kind||'product',lotId:it.lotId,productId:it.productId}; out.push(map[key]); }
+    map[key].qty++;
+  });
+  return out;
+}
+function reboxRenderCheckoutList(list){
+  var groups=reboxCartGroups();
+  if(!groups.length){ list.innerHTML='Carrello vuoto - Aggiungi un prodotto da Negozio, un Lotto o un Pacco.'; return; }
+  list.innerHTML = groups.map(function(g){
+    var k=g.key.replace(/'/g,"\\'");
+    return '<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #eee;flex-wrap:wrap"><span><b>'+String(g.name).replace(/</g,'&lt;')+'</b><br><small>'+g.price.toFixed(2)+'€ cad.</small></span><span style="display:flex;gap:6px;align-items:center"><button onclick="changeCartQty(\''+k+'\',-1)" style="width:32px;padding:6px">-</button><b>'+g.qty+'</b><button onclick="changeCartQty(\''+k+'\',1)" style="width:32px;padding:6px">+</button><b>'+(g.price*g.qty).toFixed(2)+'€</b><button onclick="removeCartGroup(\''+k+'\')" style="background:#d32f2f;color:#fff;padding:6px 10px">Elimina</button></span></div>';
+  }).join('');
+}
+function changeCartQty(key, delta){
+  var groups=reboxCartGroups();
+  var g=groups.find(function(x){ return x.key===key; }); if(!g) return;
+  if(delta>0){
+    if(g.kind==='lot'){ alert('Un lotto è unico, non puoi metterne 2 uguali.'); return; }
+    if(g.productId){
+      var p=(window.adminProducts||[]).find(function(x){ return x._id===g.productId; });
+      if(p && g.qty+1>parseInt(p.stock||0)){ alert('Disponibili solo '+p.stock+' pezzi di '+p.name+'.'); return; }
+    }
+    var src=(window.cartItems||[]).find(function(it){ return (it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price===key; });
+    if(src) window.cartItems.push({name:src.name, price:src.price, kind:src.kind, lotId:src.lotId, productId:src.productId});
+  } else {
+    var idx=(window.cartItems||[]).findIndex(function(it){ return (it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price===key; });
+    if(idx>=0) window.cartItems.splice(idx,1);
+  }
+  if(typeof saveCart==='function') saveCart();
+  if(typeof updateCartUI==='function') updateCartUI();
+}
+function removeCartGroup(key){
+  if(!confirm('Togli dal carrello?')) return;
+  window.cartItems=(window.cartItems||[]).filter(function(it){ return (it.kind||'product')+'|'+(it.lotId||'')+'|'+(it.productId||'')+'|'+it.name+'|'+it.price!==key; });
+  if(typeof saveCart==='function') saveCart();
+  if(typeof updateCartUI==='function') updateCartUI();
+}
 </script>
 </body></html>
