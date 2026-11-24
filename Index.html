@@ -191,7 +191,7 @@ async function loadProductsFromCloud(){
     if(!url||!key||url.includes('TUO-PROGETTO')) return;
     let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.products',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
     let j=await r.json();
-    if(j&&j[0]&&Array.isArray(j[0].value)){
+    if(j&&j[0]&&Array.isArray(j[0].value)){ window._auctionsCloudLoaded=true;
       adminProducts=j[0].value;
       localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts));
       if(typeof renderAdminList==='function') renderAdminList();
@@ -432,7 +432,7 @@ async function loadFeedbackFromCloud(){
     if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return;
     var r=await fetch(url+'/rest/v1/rebox_settings?id=eq.feedback',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
     var j=await r.json();
-    if(j&&j[0]&&Array.isArray(j[0].value)){ feedbacks=j[0].value; localStorage.setItem('reboxFeedback',JSON.stringify(feedbacks)); renderFeedback(); }
+    if(j&&j[0]&&Array.isArray(j[0].value)){ window._auctionsCloudLoaded=true; feedbacks=j[0].value; localStorage.setItem('reboxFeedback',JSON.stringify(feedbacks)); renderFeedback(); }
   }catch(e){ console.log('load feedback cloud',e); }
 }
 function sendFeedback(){
@@ -745,7 +745,7 @@ async function saveUsersToCloud(){
   }catch(e){ console.log('save utenti cloud',e); }
 }
 
-async function loadAuctionsFromCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.auctions',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let j=await r.json(); if(j&&j[0]&&Array.isArray(j[0].value)){ auctions=j[0].value; localStorage.setItem('reboxAuctions',JSON.stringify(auctions)); renderAuctions(); } }catch(e){ console.log('load aste cloud',e); } }
+async function loadAuctionsFromCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.auctions',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let j=await r.json(); if(j&&j[0]&&Array.isArray(j[0].value)){ window._auctionsCloudLoaded=true; auctions=j[0].value; localStorage.setItem('reboxAuctions',JSON.stringify(auctions)); renderAuctions(); } }catch(e){ console.log('load aste cloud',e); } }
 document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadAuctionsFromCloud,800); });
 var auctionSyncInterval=setInterval(function(){ if(typeof loadAuctionsFromCloud==='function') loadAuctionsFromCloud(); }, 10000);
 function fmtTime(ms){
@@ -808,9 +808,7 @@ function addAuction(){
 function closeAuction(i){
   auctions[i].closed=true; saveAuctions(); renderAuctions(); renderAdminAuctions();
 }
-function reopenAuction(i){
-  auctions[i].closed=false; auctions[i].end=Date.now()+24*3600*1000; saveAuctions(); renderAuctions(); renderAdminAuctions();
-}
+function reopenAuction(i){   var a=auctions[i]; if(!a) return; a.closed=false; a.end=Date.now()+24*3600*1000; a.updatedAt=Date.now(); saveAuctions(); renderAuctions(); renderAdminAuctions(); var _id=a.id; setTimeout(async function(){ try{ await loadAuctionsFromCloud(); }catch(e){} var _j=auctions.findIndex(function(x){ return x.id===_id; }); if(_j!==-1 && auctions[_j].closed){ alert('⚠️ Un altro dispositivo aveva ancora l\'asta chiusa e l\'ha richiusa. Premi di nuovo Riapri 24h, ora che tutti i dispositivi sono aggiornati.'); } else { var _m=document.getElementById('auctionAdminMsg'); if(_m) _m.textContent='✅ Asta riaperta e sincronizzata su tutti i dispositivi.'; } }, 2000); }
 function deleteAuction(i){
   if(!confirm('Elimini '+auctions[i].name+'?')) return;
   auctions.splice(i,1); saveAuctions(); renderAuctions(); renderAdminAuctions();
@@ -827,7 +825,7 @@ setInterval(()=>{
     let i=parseInt(t.dataset.i);
     if(auctions[i] && !auctions[i].closed){
       let left=auctions[i].end-Date.now();
-      if(left<=0){ auctions[i].closed=true; saveAuctions(); renderAuctions(); renderAdminAuctions(); }
+      if(left<=0){ if(window._auctionsCloudLoaded){ if(!window._expiringAuctions) window._expiringAuctions={}; var _aid=auctions[i]&&auctions[i].id; if(_aid && !window._expiringAuctions[_aid]){ window._expiringAuctions[_aid]=true; reboxExpireAuction(i); } } else { t.textContent='CHIUSA'; } }
       else t.textContent=fmtTime(left);
     }
   });
