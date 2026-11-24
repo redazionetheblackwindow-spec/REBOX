@@ -180,7 +180,7 @@ async function loadProductsFromCloud(){
     let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.products',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
     let j=await r.json();
     if(j&&j[0]&&Array.isArray(j[0].value)){ window._auctionsCloudLoaded=true;
-      adminProducts=j[0].value;
+      adminProducts=j[0].value; window.adminProducts=adminProducts;
       localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts));
       if(typeof renderAdminList==='function') renderAdminList();
       if(typeof renderNewProducts==='function') renderNewProducts();
@@ -752,6 +752,7 @@ function fmtTime(ms){
   let s=Math.floor(ms/1000); let h=Math.floor(s/3600); let m=Math.floor((s%3600)/60); let sec=s%60;
   return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
 }
+function maskBidderName(n){ n=String(n||'Anonimo').trim(); if(!n) return 'Anonimo'; var parts=n.split(/\s+/).filter(Boolean); if(parts.length<=1) return parts[0]||'Anonimo'; return parts[0]+' '+parts[parts.length-1].charAt(0).toUpperCase()+'.'; }
 function renderAuctions(){
   let grid=document.getElementById('auctionsGrid'); if(!grid) return; if(!auctions || auctions.length===0){ grid.innerHTML='<p style="background:#fff;padding:14px;border-radius:12px;text-align:center">Nessuna asta al momento. Torna presto!</p>'; return; }
   grid.innerHTML='<div class="grid">'+auctions.map((a,i)=>{
@@ -764,12 +765,12 @@ function renderAuctions(){
     return `<div class="card">
       <h3>Asta: ${a.name}</h3>
       <p>Offerta attuale: <b>${a.bid}€</b> • Finisce tra: <b class="auctionTimer" data-i="${i}">`+fmtTime(a.end-Date.now())+`</b></p>
-      ${a.closed?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">❌ ASTA CHIUSA - Vincitore: '+(a.bids.length?a.bids[a.bids.length-1].who:'-')+' con '+a.bid+'€</div>':''}
+      ${a.closed?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">❌ ASTA CHIUSA - Vincitore: '+(a.bids.length?maskBidderName(a.bids[a.bids.length-1].who):'-')+' con '+a.bid+'€</div>':''}
       <input id="ytInput${i}" placeholder="https://www.youtube.com/watch?v=..." value="${a.yt||''}">
       <button onclick="setAuctionYT(${i})">Guarda il teaser</button>
       <div id="ytBox${i}">${ytId?`<iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen></iframe>`:''}</div>
       <p style="font-size:13px">TEASER - Vedi un assaggio, non tutto.</p>
-      <div style="background:#FFF3E6;padding:10px;border-radius:10px;margin:8px 0"><b>Ultime 3 offerte:</b><br>${last3.length?last3.map(b=>`• <b>${b.who}</b> - ${b.amt}€ <span style="opacity:.6">(${b.when})</span>`).join('<br>'):'Nessuna offerta ancora'}</div>
+      <div style="background:#FFF3E6;padding:10px;border-radius:10px;margin:8px 0"><b>Ultime 3 offerte:</b><br>${last3.length?last3.map(b=>`• <b>${maskBidderName(b.who)}</b> - ${b.amt}€ <span style="opacity:.6">(${b.when})</span>`).join('<br>'):'Nessuna offerta ancora'}</div>
       ${a.closed?'':`<input id="bidName${i}" placeholder="Il tuo nome - es: Marco"><button onclick="placeBid(${i})" style="width:100%">Fai un'offerta +5€ → ${a.bid+5}€</button>`}
     </div>`;
   }).join('')+'</div>';
@@ -815,7 +816,7 @@ function deleteAuction(i){
 function renderAdminAuctions(){
   let el=document.getElementById('adminAuctionsList'); if(!el) return;
   if(auctions.length===0){ el.innerHTML='Nessuna asta. Creane una qui sopra.'; return; }
-  el.innerHTML=auctions.map((a,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span><b>${a.name}</b> - Ora: ${a.bid}€ - ${a.closed?'🔴 CHIUSA':'🟢 APERTA'} - Scade tra: ${fmtTime(a.end-Date.now())}</span><span><button onclick="closeAuction(${i})">Chiudi</button> <button onclick="reopenAuction(${i})">Riapri 24h</button> <button onclick="deleteAuction(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span></div>`).join('');
+  el.innerHTML=auctions.map((a,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span><b>${a.name}</b> - Ora: ${a.bid}€ - ${a.closed?'🔴 CHIUSA':'🟢 APERTA'} - Scade tra: ${fmtTime(a.end-Date.now())}</span><span><button onclick="closeAuction(${i})">Chiudi</button> <button onclick="reopenAuction(${i})">Riapri 24h</button> <button onclick="deleteAuction(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span>${(a.bids&&a.bids.length)?'<div style="background:#FFF3E6;padding:8px;border-radius:8px;margin-top:6px;font-size:13px">🔒 <b>Solo Admin - Offerte con nome completo:</b><br>'+a.bids.map(function(b){ return '• <b>'+String(b.who||'').replace(/</g,'&lt;')+'</b> - '+b.amt+'€'+(b.email?(' - '+String(b.email).replace(/</g,'&lt;')):'')+(b.phone?(' - '+String(b.phone).replace(/</g,'&lt;')):''); }).join('<br>')+'</div>':''}</div>`).join('');
 }
 // Timer che scende ogni secondo
 setInterval(()=>{
@@ -941,7 +942,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
     try{ var r=await fetch(c.url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':c.key,'Authorization':'Bearer '+c.key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:id,value:val})}); return r.ok; }catch(e){ return false; }
   }
   function slugId(name, i){ return 'p_'+String(name||'prod').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60); }
-  function normProducts(){
+  function normProducts(){ if((!window.adminProducts||!window.adminProducts.length) && typeof adminProducts!=='undefined' && adminProducts.length) window.adminProducts=adminProducts;
     if(!Array.isArray(window.adminProducts)) window.adminProducts=[];
     window.adminProducts.forEach(function(p,i){ if(!p._id) p._id=slugId(p.name,i); if(typeof p.stock==='undefined') p.stock=0; });
   }
