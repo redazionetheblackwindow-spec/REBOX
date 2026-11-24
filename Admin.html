@@ -109,7 +109,8 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 </section>
 <section id="resi"><h2>↩️ Resi e Rimborsi</h2><p><b>Reso facile: 14 giorni se il pacco è ancora sigillato. Se lo apri, hai accettato la sorpresa. Se qualcosa è rotto o manca, ti rimborsiamo noi.</b></p>
 <ul><li><b>Prodotto al dettaglio:</b> 14 giorni, prodotto integro, rimborso PayPal entro 14 giorni dal rientro.</li><li><b>Pacco sigillato:</b> reso entro 14 giorni se non aperto.</li><li><b>Pacco aperto / Asta vinta:</b> NO reso per ripensamento. Sì rimborso se rotto, pericoloso o pezzi mancanti.</li></ul>
-<h3>Richiedi reso</h3><input placeholder="Numero ordine"><input placeholder="Email"><select><option>Ripensamento pacco sigillato</option><option>Prodotto rotto</option><option>Prodotto sbagliato</option><option>Pezzi mancanti</option></select><label><input type="checkbox" style="width:auto"> Confermo pacco ancora sigillato</label><button onclick="alert('Richiesta reso inviata. Ti mandiamo codice reso e indirizzo.')">Invia richiesta reso</button></section>
+<h3>Richiedi reso</h3><input placeholder="Numero ordine"><input placeholder="Email"><select><option>Ripensamento pacco sigillato</option><option>Prodotto rotto</option><option>Prodotto sbagliato</option><option>Pezzi mancanti</option></select>
+<p id="pickupMsg" style="display:none;background:#E8F5E9;padding:12px;border-radius:10px;margin-top:10px;font-weight:800">🤝 Hai scelto il ritiro a mano: non paghi spedizione, nemmeno per il pacco grande. Dopo il pagamento ti contattiamo per luogo e orario. L\'indirizzo sotto non serve.</p><label><input type="checkbox" style="width:auto"> Confermo pacco ancora sigillato</label><button onclick="alert('Richiesta reso inviata. Ti mandiamo codice reso e indirizzo.')">Invia richiesta reso</button></section>
 <section id="feedback"><h2>⭐ Feedback</h2><div id="feedbackList"><p style="opacity:.7">Nessuna recensione ancora. Sarai il primo a lasciarla.</p></div><h3 style="margin-top:16px">Lascia una recensione</h3><label>Il tuo nome</label><input id="fbName" placeholder="Il tuo nome"><label>Stelle</label><select id="stars"><option>5</option><option>4</option><option>3</option><option>2</option><option>1</option></select><label>Titolo</label><input id="fbTitle" placeholder="Titolo"><label>Motivazione</label><textarea id="fbText" placeholder="Cosa ti è piaciuto? Cosa miglioreresti?"></textarea><label>Foto max 1MB - JPG / PNG / WEBP</label><input type="file" id="photo" accept=".jpg,.jpeg,.png,.webp"><div id="photoMsg"></div><p id="fbMsg" style="font-weight:800;color:#00A88F"></p><button onclick="sendFeedback()">Pubblica recensione</button></section>
 <section id="checkout"><h2>🛒 Checkout - Qui paghi</h2>
 <div style="background:#FFF3E6;padding:16px;border-radius:14px">
@@ -117,7 +118,8 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <div id="checkoutList" style="background:#fff;padding:12px;border-radius:10px">Carrello vuoto - Aggiungi un prodotto da Negozio o un Pacco.</div>
 <p>Prodotti: <b id="checkoutSubtotal">0€</b> • Corriere: <b id="checkoutShip">0€</b> • <b>Totale da pagare: <span id="checkoutTotal" style="font-size:24px;color:#FF7A00">0€</span></b></p>
 <label>Scegli il corriere - cambia il totale subito</label><select id="courier" onchange="updateCheckout()">
-<option value="5.90">GLS 24/48h - 5,90€ (consigliato Natale)</option>
+<option value="pickup" data-pickup="1">🤝 Ritiro a mano - 0€ (ci mettiamo d\'accordo su luogo e orario)</option>
+<option value="5.90" selected>GLS 24/48h - 5,90€ (consigliato Natale)</option>
 <option value="6.90">BRT 24/48h - 6,90€</option>
 <option value="4.90">Poste Italiane 3-7 giorni - 4,90€</option>
 <option value="4.50">InPost Locker 24/7 - 4,50€</option>
@@ -654,15 +656,16 @@ function cartHasLarge(){
 function cartHasMedium(){
   return cartItems.some(function(x){ var n=(x.name||'').toLowerCase(); return n.indexOf('medio')!==-1 || n.indexOf('medium')!==-1; });
 }
+function isPickup(){ var s=document.getElementById('courier'); if(!s) return false; var o=s.options[s.selectedIndex]; return !!(o && (o.getAttribute('data-pickup')==='1' || s.value==='pickup')); }
 function getShippingCost(total, baseShip){
-  if(cartItems.length===0) return 0;
+  if(isPickup()) return 0; if(cartItems.length===0) return 0;
   if(total>=80) return 0;
   if(cartHasLarge()) return baseShip + 12;
   if(cartHasMedium()) return baseShip + 4;
   return baseShip;
 }
 function getShippingLabel(total, baseShip){
-  if(cartItems.length===0) return '';
+  if(isPickup()) return '🤝 Ritiro a mano: 0€, niente corriere. Ti contattiamo per luogo e orario.'; if(cartItems.length===0) return '';
   if(total>=80) return 'Spedizione GRATIS - sopra 80 euro, anche per pacco grande';
   if(cartHasLarge()) return 'Pacco GRANDE 80x60x40 - ingombrante, peso non stimabile: corriere + 12 euro di supplemento';
   if(cartHasMedium()) return 'Pacco MEDIO: corriere + 4 euro di supplemento';
@@ -672,8 +675,7 @@ function getShippingLabel(total, baseShip){
 function updateCheckout(){
   let total = cartTotal();
   let shipSel = document.getElementById('courier');
-  let ship = shipSel ? parseFloat(shipSel.value) : 0;
-  ship = getShippingCost(total, ship);
+  let ship = (shipSel && shipSel.value==='pickup') ? 0 : (shipSel ? parseFloat(shipSel.value) : 0);   ship = getShippingCost(total, ship);
   if(cartItems.length===0) ship=0;
   let finalTotal = total + ship;
   let list = document.getElementById('checkoutList');
@@ -684,7 +686,7 @@ function updateCheckout(){
   let st=document.getElementById('checkoutSubtotal'); if(st) st.textContent=total.toFixed(2)+'€';
   let sh=document.getElementById('checkoutShip'); if(sh) sh.textContent=ship.toFixed(2)+'€';
   let ft=document.getElementById('checkoutTotal'); if(ft) ft.textContent=finalTotal.toFixed(2)+'€';
-  let fm=document.getElementById('freeShipMsg'); if(fm) fm.textContent = total>=80 ? '✅ Spedizione GRATIS sbloccata! Sopra 80€ non paghi corriere, nemmeno per pacco grande.' : (total>0 ? 'Mancano '+(80-total).toFixed(2)+'€ per spedizione gratis' : '');
+  let fm=document.getElementById('freeShipMsg'); if(fm) fm.textContent = isPickup() ? '🤝 Ritiro a mano: non paghi spedizione.' : (total>=80 ? '✅ Spedizione GRATIS sbloccata! Sopra 80€ non paghi corriere, nemmeno per pacco grande.' : (total>0 ? 'Mancano '+(80-total).toFixed(2)+'€ per spedizione gratis' : ''));   let pm=document.getElementById('pickupMsg'); if(pm) pm.style.display = isPickup() ? 'block' : 'none';   let ad=document.getElementById('custAddr'); if(ad) ad.placeholder = isPickup() ? 'Indirizzo (facoltativo se ritiri a mano)' : 'Indirizzo completo *';
   let sd=document.getElementById('shipDetail'); if(sd) sd.textContent = getShippingLabel(total, shipSel ? parseFloat(shipSel.value) : 0);
   renderPayPal();
 }
@@ -717,8 +719,7 @@ function loadPayPalSDK(){
   }
   let total = cartTotal();
   let shipSel = document.getElementById('courier');
-  let ship = shipSel ? parseFloat(shipSel.value) : 0;
-  ship = getShippingCost(total, ship);
+  let ship = (shipSel && shipSel.value==='pickup') ? 0 : (shipSel ? parseFloat(shipSel.value) : 0);   ship = getShippingCost(total, ship);
   if(cartItems.length===0) ship=0;
   let finalTotal = (total+ship).toFixed(2);
   if(cartItems.length===0){
@@ -747,8 +748,8 @@ function renderPayPalButtons(finalTotal){
       createOrder: function(data, actions){
         let name=document.getElementById('custName').value.trim();
         let addr=document.getElementById('custAddr').value.trim();
-        if(!name||!addr){ alert('Metti Nome e Indirizzo prima di pagare con PayPal'); throw new Error('Dati mancanti'); }
-        return actions.order.create({ purchase_units:[{ amount:{ value: finalTotal, currency_code:'EUR' }, description:'Ordine REBOX - '+cartItems.map(x=>x.name).join(', ') }] });
+        if(!name || (!isPickup() && !addr)){ alert(isPickup() ? 'Metti il Nome prima di pagare con PayPal' : 'Metti Nome e Indirizzo prima di pagare con PayPal'); throw new Error('Dati mancanti'); }
+        return actions.order.create({ purchase_units:[{ amount:{ value: finalTotal, currency_code:'EUR' }, description:'Ordine REBOX - '+cartItems.map(x=>x.name).join(', ')+(isPickup() ? ' - RITIRO A MANO' : '') }] });
       },
       onApprove: function(data, actions){
         return actions.order.capture().then(async function(details){
@@ -756,7 +757,7 @@ function renderPayPalButtons(finalTotal){
           msg.textContent='✅ Pagamento riuscito! Grazie '+details.payer.name.given_name+'. ID PayPal: '+details.id+'. Ti abbiamo mandato la conferma.';
           msg.style.color='green';
           // Salva ordine: 1) in questo browser 2) su Supabase 3) scala lo stock PRIMA di svuotare
-let order={id:details.id, items:JSON.parse(JSON.stringify(cartItems)), total:finalTotal, name:document.getElementById('custName').value, addr:document.getElementById('custAddr').value, email:document.getElementById('custEmail')?document.getElementById('custEmail').value:'', date:new Date().toLocaleString('it-IT'), status:'pagato'};
+let _cs=document.getElementById('courier'); let _ship=finalTotal - cartItems.reduce((s,x)=>s+parseFloat(x.price||0),0); let order={id:details.id, delivery:(_cs&&_cs.options[_cs.selectedIndex])?_cs.options[_cs.selectedIndex].text:'', shipping:_ship, items:JSON.parse(JSON.stringify(cartItems)), total:finalTotal, name:document.getElementById('custName').value, addr:document.getElementById('custAddr').value, email:document.getElementById('custEmail')?document.getElementById('custEmail').value:'', date:new Date().toLocaleString('it-IT'), status:'pagato'};
 let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');
 if(!orders.some(function(o){ return o.id===order.id; })) orders.push(order);
 localStorage.setItem('reboxOrders', JSON.stringify(orders));
@@ -795,7 +796,7 @@ async function sendOrderToSupabase(order){
     let get = await fetch(url.replace(/\/$/,'')+'/rest/v1/rebox_settings?id=eq.orders',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let gj = await get.json(); let all = (gj&&gj[0]&&Array.isArray(gj[0].value)) ? gj[0].value : []; if(!all.some(function(o){ return o.id===order.id; })) all.push(order); let res = await fetch(url.replace(/\/$/,'')+'/rest/v1/rebox_settings', { method:'POST', headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'}, body: JSON.stringify({id:'orders', value:all}) }); return res.ok;
   }catch(e){ console.log('Supabase ordine errore',e); return false; }
 }
-async function loadOrders(){   let el=document.getElementById('ordersList');   if(!el) return;   let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');   try{     let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';     let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';     if(url&&key&&url.indexOf('TUO-PROGETTO')===-1){       let r=await fetch(url.replace(/\/$/,'')+'/rest/v1/rebox_settings?id=eq.orders',{headers:{'apikey':key,'Authorization':'Bearer '+key}});       let j=await r.json();       if(j&&j[0]&&Array.isArray(j[0].value)){         j[0].value.forEach(function(o){ if(!orders.some(function(x){ return x.id===o.id; })) orders.push(o); });         localStorage.setItem('reboxOrders', JSON.stringify(orders));       }     }   }catch(e){ console.log('load ordini cloud',e); }   if(orders.length===0){ el.innerHTML='Nessun ordine ancora. Quando qualcuno paga, apparirà qui (anche da un altro dispositivo, se Supabase è collegato).'; return; }   el.innerHTML = orders.map(o=>`<div style="border-bottom:1px solid #eee;padding:10px 0"><b>Ordine ${o.id}</b> - ${o.date||''}<br>${(o.items||[]).map(i=>i.name).join(', ')} - Totale: <b>${o.total}€</b><br>Cliente: ${o.name||''} - ${o.addr||''}${o.email?(' - '+o.email):''} - ${o.status||'pagato'}</div>`).join('') + '<p><b>Totale ordini: '+orders.length+'</b></p>'; } // Quando un ordine va a buon fine, salva anche su Supabase
+async function loadOrders(){   let el=document.getElementById('ordersList');   if(!el) return;   let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');   try{     let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';     let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';     if(url&&key&&url.indexOf('TUO-PROGETTO')===-1){       let r=await fetch(url.replace(/\/$/,'')+'/rest/v1/rebox_settings?id=eq.orders',{headers:{'apikey':key,'Authorization':'Bearer '+key}});       let j=await r.json();       if(j&&j[0]&&Array.isArray(j[0].value)){         j[0].value.forEach(function(o){ if(!orders.some(function(x){ return x.id===o.id; })) orders.push(o); });         localStorage.setItem('reboxOrders', JSON.stringify(orders));       }     }   }catch(e){ console.log('load ordini cloud',e); }   if(orders.length===0){ el.innerHTML='Nessun ordine ancora. Quando qualcuno paga, apparirà qui (anche da un altro dispositivo, se Supabase è collegato).'; return; }   el.innerHTML = orders.map(o=>`<div style="border-bottom:1px solid #eee;padding:10px 0"><b>Ordine ${o.id}</b> - ${o.date||''}<br>${(o.items||[]).map(i=>i.name).join(', ')} - Totale: <b>${o.total}€</b><br>Cliente: ${o.name||''} - ${o.addr||''}${o.delivery?(' - 🚚 '+o.delivery):''}${o.email?(' - '+o.email):''} - ${o.status||'pagato'}</div>`).join('') + '<p><b>Totale ordini: '+orders.length+'</b></p>'; } // Quando un ordine va a buon fine, salva anche su Supabase
 let _origPayFake = null;
 
 var boxStocks = JSON.parse(localStorage.getItem('reboxBoxStocks')||'{"Piccolo":48,"Medio":42,"Grande":28}');
