@@ -1,5 +1,6 @@
 <!DOCTYPE html><html lang="it"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Admin REBOX - SOLO TU - REBOX - Resi Stock Casa | Pacchi Misteriosi, Aste, -66%</title>
+<meta name="robots" content="noindex, nofollow">
 <style>
 *{box-sizing:border-box}body{margin:0;padding-bottom:80px;font-family:system-ui,Arial;background:#071A33;color:#fff}
 a{color:#FF7A00}.top{background:#FF7A00;color:#071A33;text-align:center;padding:10px;font-weight:800}
@@ -21,6 +22,13 @@ footer{padding:30px;text-align:center;opacity:.8}.hidden{display:none}
 table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;padding:8px;text-align:left}
 .promo{background:#FFD166;color:#071A33;border-radius:18px;padding:18px;text-align:center;font-weight:800}
 .searchbar{display:flex;gap:8px;max-width:700px;margin:16px auto}.searchbar input{flex:1}
+
+/* FIX MENU - non va più a capo e non schiaccia la pagina */
+header{flex-wrap:wrap;gap:10px}
+header nav{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+header nav a{margin:0;padding:8px 12px;background:rgba(255,255,255,.08);border-radius:999px;font-size:14px;white-space:nowrap}
+header nav a:hover{background:#FF7A00;color:#071A33}
+@media(max-width:640px){ header nav a{font-size:13px;padding:7px 10px} .hero h1{font-size:32px} }
 </style>
 <style>
 .box-card{overflow:hidden;border-radius:22px!important;box-shadow:0 10px 30px rgba(0,0,0,.15)!important;border:3px solid #FF7A00!important;position:relative}
@@ -29,7 +37,7 @@ table{width:100%;border-collapse:collapse}td,th{border-bottom:1px solid #ddd;pad
 .box-card .box-badge2{position:absolute;top:12px;right:12px;background:#00A88F;color:#fff;padding:6px 12px;border-radius:999px;font-weight:900;font-size:13px}
 .box-price{font-size:32px!important;color:#FF7A00}
 </style>
-<script src="config.js">
+<script src="config.js"></script><script>
 // --- PayPal ONLINE: lo prende da config.js o da Supabase admin_config, non solo da questo PC ---
 async function loadPaypalFromCloud(){
   try{
@@ -70,9 +78,9 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <p style="font-size:12px">I tuoi dati servono solo per: avvisarti se vinci un'asta, mandarti conferma ordine, contattarti per spedizione. Non li vendiamo.</p>
 </div>
 </div>
-<div class="top">🎄 NATALE: Ordina entro il 18 dicembre • No coda, no freddo, no stress • 3,2,1 ONLINE • Spedizione gratis sopra 59€</div>
+<div class="top">🎄 NATALE: Ordina entro il 18 dicembre • No coda, no freddo, no stress • 3,2,1 ONLINE • Spedizione gratis sopra 80€</div>
 <header><div class="logo">REBOX<span> •</span><small>RESI • STOCK • CASA</small></div>
-<nav><a href="#negozio">Negozio</a><a href="#pacchi">Pacchi</a><a href="#aste">Aste 3,2,1</a><a href="#resi">Resi</a><a href="#feedback">Feedback</a><a href="#admin">Admin</a></nav></header>
+<nav><a href="index.html">Home</a><a href="negozio.html">Negozio</a><a href="lotti.html">Lotti</a><a href="pacchi.html">Pacchi</a><a href="aste.html">Aste 3,2,1</a><a href="chi-siamo.html">Chi siamo</a><a href="resi.html">Resi</a><a href="feedback.html">Feedback</a></nav></header>
 
 <div class="hero"><span class="badge">FINO A -66% • PAGHI 1/3, SCOPRI 3X VALORE</span>
 <h1>Il Natale che <em>non ti fa fare la coda</em></h1>
@@ -90,7 +98,7 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <div id="searchRes" style="margin-top:16px"></div>
 <p style="font-size:13px">Per eliminare un prodotto: Admin > Lista Prodotti > Elimina. Per nasconderlo senza cancellarlo: Blocca.</p>
 </section>
-<section id="pacchi"><h2>📦 Pacchi Misteriosi REBOX</h2><p><b>Numero pezzi variabile in base alla dimensione degli oggetti contenuti. I pezzi indicati sono solo di riferimento.</b><br>Se dentro ci sono oggetti grandi, i pezzi saranno di meno. Se ci sono oggetti piccoli, i pezzi saranno di più.<br><b>Valore stimato solo di riferimento. Il valore reale e il contenuto esatto non sono conoscibili prima dell'apertura. </b></p>
+<section id="lotti"><h2>📦 Lotti REBOX - Più prodotti insieme</h2><p>Ogni lotto contiene i prodotti elencati. <b>Se compri un lotto, i prodotti dentro si tolgono dalla vendita singola. Se compri un singolo prodotto, il lotto che lo conteneva diventa non disponibile (appannato).</b> La foto del lotto è verticale.</p><div id="lotsGrid"></div></section> <section id="pacchi"><h2>📦 Pacchi Misteriosi REBOX</h2><p><b>Numero pezzi variabile in base alla dimensione degli oggetti contenuti. I pezzi indicati sono solo di riferimento.</b><br>Se dentro ci sono oggetti grandi, i pezzi saranno di meno. Se ci sono oggetti piccoli, i pezzi saranno di più.<br><b>Valore stimato solo di riferimento. Il valore reale e il contenuto esatto non sono conoscibili prima dell'apertura. </b></p>
 <div class="grid">
 <div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-piccolo.webp" alt="Pacco Piccolo REBOX"><span class="box-badge">🎁 PICCOLO</span><span class="box-badge2">-68%</span></div><h3>Pacco PICCOLO</h3><div class="price">19€</div><p><b>Fino a 15 pezzi</b></p><p>Valore stimato: 60€+</p><p>Disponibili: <b id="stockPiccolo">48</b></p><button id="btnPiccolo" onclick="buy('Pacco Piccolo',19)">Acquista alla cieca</button><div id="esauritoPiccolo" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
 <div class="card box-card"><div class="box-card" style="margin:-18px -18px 12px -18px"><img src="pacco-medio.webp" alt="Pacco Medio REBOX"><span class="box-badge">🎁 MEDIO • PIÙ SCELTO</span><span class="box-badge2">-67%</span></div><h3>Pacco MEDIO</h3><div class="price">39€</div><p><b>Da 16 a 30 pezzi</b></p><p>Valore stimato: 120€+</p><p>Disponibili: <b id="stockMedio">42</b></p><button id="btnMedio" onclick="buy('Pacco Medio',39)">Acquista alla cieca</button><div id="esauritoMedio" style="display:none;background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900;margin-top:8px">❌ ESAURITO</div></div>
@@ -116,7 +124,7 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <option value="9.90">DHL Express - 9,90€</option>
 <option value="8.90">UPS - 8,90€</option>
 </select>
-<p id="freeShipMsg" style="font-weight:800;color:#00A88F"></p>
+<p id="shipDetail" style="font-size:13px;color:#555;margin:4px 0"></p><p id="freeShipMsg" style="font-weight:800;color:#00A88F"></p>
 <input id="custName" placeholder="Nome e cognome *">
 <input id="custAddr" placeholder="Indirizzo completo *">
 <input id="custEmail" placeholder="Email per conferma ordine *">
@@ -148,6 +156,16 @@ document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadPaypalFromClou
 <button onclick="addAuction()">➕ Crea nuova asta</button>
 <p id="auctionAdminMsg"></p><button onclick="deleteAllAuctions()" style="background:#d32f2f;color:#fff;margin-top:8px">Elimina TUTTE le aste</button> <button onclick="loadAuctionsFromCloud()" style="margin-top:8px">Sincronizza aste</button><p style="font-size:12px">Se cancelli qui, ora si cancella anche su Supabase. Se il telefono la mostra ancora, ricarica la pagina da telefono.</p>
 <div id="adminAuctionsList" style="background:#fff;padding:12px;border-radius:12px"></div>
+<h3>📦 Gestione Lotti - Crea un lotto dai prodotti inseriti</h3>
+<p><b>Come si fa:</b> 1. Dai un nome al lotto 2. Metti prezzo lotto 3. Carica foto verticale 4. Spunta i prodotti che ci metti dentro 5. Crea lotto. Il lotto appare subito nel sito, con foto verticale.</p>
+<label>Nome lotto - lo dai tu</label><input id="lotName" placeholder="Es: Lotto Moto Raptor - 5 pezzi">
+<label>Prezzo lotto €</label><input id="lotPrice" type="number" placeholder="Es: 110">
+<label>Prezzo vecchio € (facoltativo)</label><input id="lotOld" type="number" placeholder="Es: 204">
+<label>📸 Foto verticale lotto - max 1MB - JPG / PNG / WEBP</label><input id="lotPhoto" type="file" accept=".jpg,.jpeg,.png,.webp"><div id="lotPhotoPreview" style="margin:6px 0"></div>
+<label style="font-weight:800">Prodotti dentro il lotto - scegli dai prodotti inseriti</label><div id="lotProductPicker" style="background:#FFF3E6;padding:10px;border-radius:12px"></div>
+<button onclick="addLot()">➕ Crea lotto</button><p id="lotMsg" style="font-weight:800;color:#00A88F"></p>
+<h4>Lotti esistenti</h4><div id="adminLotsList" style="background:#fff;padding:12px;border-radius:12px"></div>
+<p style="font-size:12px">Se vendi un lotto fuori dal sito (es: mercatino), premi <b>Segna venduto</b>: si tolgono anche i prodotti singoli dentro. Se vendi un singolo fuori dal sito, vai in Lista Prodotti e premi <b>Segna venduto</b> sul prodotto: il lotto diventa appannato.</p>
 <h3>📦 Modifica Quantità Pacchi - DA QUI CAMBI 48 / 42 / 28</h3>
 <p>Scrivi la quantità vera che hai in magazzino e clicca Salva. Si aggiorna subito nel negozio.</p>
 <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
@@ -209,10 +227,10 @@ function buy(n,p){
   }
 
   try{
-    if(!n) n='Prodotto';
+    if(!n) n='Prodotto'; try{ if(!String(n).includes('Pacco') && String(n).indexOf('LOTTO:')!==0){ var _bp=(window.adminProducts||[]).find(function(x){ return x.name===String(n); }); if(_bp && (window.cartItems||[]).some(function(it){ return it.kind==='lot' && (it.productIds||[]).indexOf(_bp._id)!==-1; })){ alert('Nel carrello hai già un lotto che contiene "'+String(n)+'". Togli il lotto per comprare il singolo, o compra solo il lotto.'); return; } } }catch(e){}
     let price = parseFloat(p);
     if(isNaN(price)) price=0;
-    cartItems.push({name:String(n), price:price}); if(String(n).includes('Pacco')){ try{ decrementBoxStock(String(n)); }catch(e){} }
+    cartItems.push({name:String(n), price:price, kind:(String(n).indexOf('LOTTO:')===0?'lot':'product'), productId:(function(){ var _pp=(window.adminProducts||[]).find(function(x){ return x.name===String(n); }); return _pp?_pp._id:undefined; })()}); if(String(n).includes('Pacco')){ try{ decrementBoxStock(String(n)); }catch(e){} }
     saveCart();
     if(typeof updateCartUI==='function') updateCartUI();
     if(typeof forceShowCart==='function') forceShowCart();
@@ -370,7 +388,7 @@ function addProduct(){
   let price=document.getElementById('newPrice').value;
   let stock=document.getElementById('newStock').value;
   if(!name||!price){ alert('Metti almeno Nome e Prezzo REBOX'); return; }
-  let isNew=document.getElementById('newIsNew')?.checked||false; if(window._editingProduct!==undefined && window._editingProduct!==null){ var _i=window._editingProduct; var _oldIsNew=adminProducts[_i].isNew; var _oldAt=adminProducts[_i].newAt; adminProducts[_i]={cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:adminProducts[_i].blocked,photo:adminProducts[_i].photo||tempProductPhoto||'',desc:document.getElementById('newDesc')?.value.trim()||'',specs:document.getElementById('newSpecs')?.value.trim()||'',isNew:document.getElementById('newIsNew')?.checked||false,newAt:document.getElementById('newIsNew')?.checked?( _oldIsNew?_oldAt:Date.now()):0}; if(adminProducts[_i].isNew) enforceNovitaLimit(); window._editingProduct=null; var _b=document.querySelector('button[onclick="addProduct()"]'); if(_b) _b.textContent='Aggiungi prodotto al negozio'; localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); document.getElementById('addMsg').textContent='Modifiche salvate!'; document.getElementById('newName').value=''; var _dd=document.getElementById('newDesc'); if(_dd) _dd.value=''; var _ss=document.getElementById('newSpecs'); if(_ss) _ss.value=''; renderAdminList(); renderNewProducts(); return; } var _desc=document.getElementById('newDesc')?.value.trim()||''; var _specs=document.getElementById('newSpecs')?.value.trim()||''; adminProducts.push({cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||'',desc:_desc,specs:_specs,isNew:isNew,newAt:isNew?Date.now():0}); if(isNew) enforceNovitaLimit(); let _cb=document.getElementById('newIsNew'); if(_cb) _cb.checked=false; tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
+  let isNew=document.getElementById('newIsNew')?.checked||false; if(window._editingProduct!==undefined && window._editingProduct!==null){ var _i=window._editingProduct; var _oldIsNew=adminProducts[_i].isNew; var _oldAt=adminProducts[_i].newAt; adminProducts[_i]={cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:adminProducts[_i].blocked,photo:adminProducts[_i].photo||tempProductPhoto||'',desc:document.getElementById('newDesc')?.value.trim()||'',specs:document.getElementById('newSpecs')?.value.trim()||'',isNew:document.getElementById('newIsNew')?.checked||false,newAt:document.getElementById('newIsNew')?.checked?( _oldIsNew?_oldAt:Date.now()):0}; if(adminProducts[_i].isNew) enforceNovitaLimit(); window._editingProduct=null; var _b=document.querySelector('button[onclick="addProduct()"]'); if(_b) _b.textContent='Aggiungi prodotto al negozio'; localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); document.getElementById('addMsg').textContent='Modifiche salvate!'; document.getElementById('newName').value=''; var _dd=document.getElementById('newDesc'); if(_dd) _dd.value=''; var _ss=document.getElementById('newSpecs'); if(_ss) _ss.value=''; renderAdminList(); renderNewProducts(); return; } var _desc=document.getElementById('newDesc')?.value.trim()||''; var _specs=document.getElementById('newSpecs')?.value.trim()||''; adminProducts.push({_id:'p_'+String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)+'_'+Date.now().toString(36),cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||'',desc:_desc,specs:_specs,isNew:isNew,newAt:isNew?Date.now():0}); if(isNew) enforceNovitaLimit(); let _cb=document.getElementById('newIsNew'); if(_cb) _cb.checked=false; tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
   localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
   document.getElementById('addMsg').textContent='✅ '+name+' aggiunto in '+cat+'! Ora è visibile nel negozio.';
   document.getElementById('newName').value=''; var _d=document.getElementById('newDesc'); if(_d) _d.value=''; var _s=document.getElementById('newSpecs'); if(_s) _s.value=''; renderAdminList(); renderNewProducts();
@@ -592,7 +610,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ renderShop(); });
 function saveCart(){ localStorage.setItem('reboxCart', JSON.stringify(cartItems)); }
 function cartTotal(){ return cartItems.reduce((s,x)=>s+x.price,0); }
 
-function clearCart(){ cartItems=[]; saveCart(); updateCartUI(); }
+function clearCart(){ if(typeof reboxApplySoldItems==='function') reboxApplySoldItems(cartItems); cartItems=[]; saveCart(); updateCartUI(); }
 function removeItem(i){ cartItems.splice(i,1); saveCart(); updateCartUI(); }
 function scrollToCheckout(){ document.getElementById('checkout').scrollIntoView({behavior:'smooth'}); }
 function updateCartUI(){
@@ -604,11 +622,38 @@ function updateCartUI(){
   let t = document.getElementById('total'); if(t) t.textContent = total.toFixed(2)+'€';
   updateCheckout();
 }
+
+// SPEDIZIONE IN BASE ALLA GRANDEZZA DEL PACCO
+// Piccolo / prodotti normali = prezzo corriere scelto
+// Medio = corriere + 4 euro
+// Grande 80x60x40 (peso non stimabile, ingombrante) = corriere + 12 euro
+// Sopra 80 euro di prodotti = spedizione GRATIS anche se pacco grande
+function cartHasLarge(){
+  return cartItems.some(function(x){ var n=(x.name||'').toLowerCase(); return n.indexOf('grande')!==-1 || n.indexOf('large')!==-1 || n.indexOf('80x60')!==-1 || n.indexOf('80cm')!==-1 || n.indexOf('pacco sorpresa')!==-1 || n.indexOf('asta')!==-1; });
+}
+function cartHasMedium(){
+  return cartItems.some(function(x){ var n=(x.name||'').toLowerCase(); return n.indexOf('medio')!==-1 || n.indexOf('medium')!==-1; });
+}
+function getShippingCost(total, baseShip){
+  if(cartItems.length===0) return 0;
+  if(total>=80) return 0;
+  if(cartHasLarge()) return baseShip + 12;
+  if(cartHasMedium()) return baseShip + 4;
+  return baseShip;
+}
+function getShippingLabel(total, baseShip){
+  if(cartItems.length===0) return '';
+  if(total>=80) return 'Spedizione GRATIS - sopra 80 euro, anche per pacco grande';
+  if(cartHasLarge()) return 'Pacco GRANDE 80x60x40 - ingombrante, peso non stimabile: corriere + 12 euro di supplemento';
+  if(cartHasMedium()) return 'Pacco MEDIO: corriere + 4 euro di supplemento';
+  return 'Pacco standard: prezzo corriere scelto';
+}
+
 function updateCheckout(){
   let total = cartTotal();
   let shipSel = document.getElementById('courier');
   let ship = shipSel ? parseFloat(shipSel.value) : 0;
-  if(total>=59) ship=0;
+  ship = getShippingCost(total, ship);
   if(cartItems.length===0) ship=0;
   let finalTotal = total + ship;
   let list = document.getElementById('checkoutList');
@@ -619,7 +664,8 @@ function updateCheckout(){
   let st=document.getElementById('checkoutSubtotal'); if(st) st.textContent=total.toFixed(2)+'€';
   let sh=document.getElementById('checkoutShip'); if(sh) sh.textContent=ship.toFixed(2)+'€';
   let ft=document.getElementById('checkoutTotal'); if(ft) ft.textContent=finalTotal.toFixed(2)+'€';
-  let fm=document.getElementById('freeShipMsg'); if(fm) fm.textContent = total>=59 ? '✅ Spedizione GRATIS sbloccata! Sopra 59€ non paghi corriere.' : (total>0 ? 'Mancano '+(59-total).toFixed(2)+'€ per spedizione gratis' : '');
+  let fm=document.getElementById('freeShipMsg'); if(fm) fm.textContent = total>=80 ? '✅ Spedizione GRATIS sbloccata! Sopra 80€ non paghi corriere, nemmeno per pacco grande.' : (total>0 ? 'Mancano '+(80-total).toFixed(2)+'€ per spedizione gratis' : '');
+  let sd=document.getElementById('shipDetail'); if(sd) sd.textContent = getShippingLabel(total, shipSel ? parseFloat(shipSel.value) : 0);
   renderPayPal();
 }
 
@@ -652,7 +698,7 @@ function loadPayPalSDK(){
   let total = cartTotal();
   let shipSel = document.getElementById('courier');
   let ship = shipSel ? parseFloat(shipSel.value) : 0;
-  if(total>=59) ship=0;
+  ship = getShippingCost(total, ship);
   if(cartItems.length===0) ship=0;
   let finalTotal = (total+ship).toFixed(2);
   if(cartItems.length===0){
@@ -982,4 +1028,227 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
 <span style="display:flex;gap:8px"><button onclick="scrollToCheckout()" style="background:#071A33;color:#fff;padding:12px 18px">VAI A PAGARE →</button><button onclick="clearCart()" style="background:#fff;color:#071A33;padding:12px 14px">Svuota</button></span>
 </div>
 <div style="height:70px"></div>
-<div id="productModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:center;padding:12px" onclick="if(event.target.id==='productModal') closeProductModal()"><div style="background:#fff;max-width:520px;width:100%;border-radius:18px;overflow:hidden;max-height:92vh;overflow-y:auto;position:relative"><button onclick="closeProductModal()" style="position:absolute;top:10px;right:10px;z-index:2;background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px">X</button><div id="productModalContent"></div></div></div><div id="specsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;justify-content:center;align-items:center;padding:12px" onclick="if(event.target.id==='specsModal') closeSpecsPopup()"><div style="background:#fff;max-width:480px;width:100%;border-radius:18px;max-height:88vh;overflow-y:auto;position:relative"><button onclick="closeSpecsPopup()" style="position:absolute;top:10px;right:10px;background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer">X</button><div id="specsModalContent" style="padding:22px"></div></div></div></body></html>
+<div id="productModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.6);z-index:9999;justify-content:center;align-items:center;padding:12px" onclick="if(event.target.id==='productModal') closeProductModal()"><div style="background:#fff;max-width:520px;width:100%;border-radius:18px;overflow:hidden;max-height:92vh;overflow-y:auto;position:relative"><button onclick="closeProductModal()" style="position:absolute;top:10px;right:10px;z-index:2;background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px">X</button><div id="productModalContent"></div></div></div><div id="specsModal" style="display:none;position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.7);z-index:10000;justify-content:center;align-items:center;padding:12px" onclick="if(event.target.id==='specsModal') closeSpecsPopup()"><div style="background:#fff;max-width:480px;width:100%;border-radius:18px;max-height:88vh;overflow-y:auto;position:relative"><button onclick="closeSpecsPopup()" style="position:absolute;top:10px;right:10px;background:#000;color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer">X</button><div id="specsModalContent" style="padding:22px"></div></div></div><script>
+/* ===== REBOX LOTTI + REALTIME FIX (online, niente locale) ===== */
+(function(){
+  // --- helpers cloud ---
+  function cloudCfg(){ var u=(localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''); var k=(localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''); if(!u||!k||u.indexOf('TUO-PROGETTO')!==-1) return null; return {url:u.replace(/\/$/,''), key:k}; }
+  async function cloudGet(id){
+    var c=cloudCfg(); if(!c) return null;
+    try{
+      var r=await fetch(c.url+'/rest/v1/rebox_settings?id=eq.'+encodeURIComponent(id)+'&_t='+Date.now(), {headers:{'apikey':c.key,'Authorization':'Bearer '+c.key,'Cache-Control':'no-cache'}, cache:'no-store'});
+      var j=await r.json(); return (j&&j[0])?j[0].value:null;
+    }catch(e){ console.log('cloudGet',id,e); return null; }
+  }
+  async function cloudSet(id,val){
+    var c=cloudCfg(); if(!c) return false;
+    try{ var r=await fetch(c.url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':c.key,'Authorization':'Bearer '+c.key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:id,value:val})}); return r.ok; }catch(e){ return false; }
+  }
+  function slugId(name, i){ return 'p_'+String(name||'prod').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60); }
+  function normProducts(){
+    if(!Array.isArray(window.adminProducts)) window.adminProducts=[];
+    window.adminProducts.forEach(function(p,i){ if(!p._id) p._id=slugId(p.name,i); if(typeof p.stock==='undefined') p.stock=0; });
+  }
+  // --- LOTTI state ---
+  window.lots = [];
+  try{ window.lots = JSON.parse(localStorage.getItem('reboxLots')||'[]'); }catch(e){ window.lots=[]; }
+  function saveLotsLocal(){ try{ localStorage.setItem('reboxLots', JSON.stringify(window.lots)); }catch(e){} }
+  async function saveLotsToCloud(){ saveLotsLocal(); return cloudSet('lots', window.lots); }
+  window.saveLotsToCloud = saveLotsToCloud;
+  async function loadLotsFromCloud(){
+    var v=await cloudGet('lots'); if(Array.isArray(v)){ window.lots=v; saveLotsLocal(); }
+    if(typeof renderLots==='function') renderLots();
+    if(typeof renderAdminLots==='function') renderAdminLots();
+    if(typeof renderLotPicker==='function') renderLotPicker();
+    return window.lots;
+  }
+  window.loadLotsFromCloud = loadLotsFromCloud;
+  function prodById(id){ normProducts(); for(var i=0;i<window.adminProducts.length;i++){ var p=window.adminProducts[i]; if(p._id===id||p.name===id) return p; } return null; }
+  window.reboxProdById = prodById;
+  function lotDimmedReason(lot){
+    if(!lot) return 'Lotto non trovato';
+    if(lot.sold) return 'Lotto già venduto';
+    if(lot.blocked) return 'Lotto nascosto da Admin';
+    if(!lot.productIds||!lot.productIds.length) return 'Lotto vuoto';
+    for(var i=0;i<lot.productIds.length;i++){
+      var p=prodById(lot.productIds[i]);
+      if(!p) return 'Manca un prodotto del lotto (eliminato)';
+      if(p.blocked) return 'Un prodotto del lotto è nascosto: '+p.name;
+      if(parseInt(p.stock||0)<=0) return 'Manca un prodotto del lotto: '+p.name+' (esaurito)';
+    }
+    return '';
+  }
+  window.reboxLotDimmedReason = lotDimmedReason;
+  function renderLots(){
+    var grid=document.getElementById('lotsGrid'); if(!grid) return;
+    var vis=(window.lots||[]).filter(function(l){ return !l.blocked; });
+    if(!vis.length){ grid.innerHTML='<p style="background:#fff;padding:14px;border-radius:12px;text-align:center">Nessun lotto al momento. Torna presto!</p>'; return; }
+    grid.innerHTML='<div class="grid">'+vis.map(function(lot){
+      var reason=lotDimmedReason(lot); var dim=!!reason;
+      var names=(lot.productIds||[]).map(function(id){ var p=prodById(id); return p?('<li>'+String(p.name).replace(/</g,'&lt;')+' — '+(parseInt(p.stock||0)>0?'✅ disponibile':'❌ esaurito')+'</li>'):('<li>❌ prodotto mancante</li>'); }).join('');
+      var img=lot.photo?('<div style="aspect-ratio:3/4;overflow:hidden;border-radius:14px;background:#FFF3E6;margin:-18px -18px 12px -18px"><img src="'+lot.photo+'" style="width:100%;height:100%;object-fit:cover;display:block" alt=""></div>'):('<div style="aspect-ratio:3/4;background:#FFF3E6;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:60px;margin:-18px -18px 12px -18px">📦</div>');
+      var oldHtml=lot.old?('<span class="old">'+lot.old+'€</span> '):'';
+      return '<div class="card" style="'+(dim?'opacity:.55;filter:grayscale(.7)':'')+'">'+img
+        +'<span class="catlabel">📦 LOTTO REBOX</span><h3>'+String(lot.name||'Lotto').replace(/</g,'&lt;')+'</h3>'
+        +'<div>'+oldHtml+'<span class="price">'+lot.price+'€</span></div>'
+        +'<p style="font-size:13px"><b>Contiene ('+(lot.productIds||[]).length+' prodotti):</b></p><ul style="font-size:13px;margin:0 0 10px;padding-left:18px">'+names+'</ul>'
+        +(dim?('<div style="background:#eee;padding:10px;border-radius:10px;text-align:center;font-weight:900">⚠️ NON DISPONIBILE<br><small>'+reason.replace(/</g,'&lt;')+'</small></div>')
+              :('<button onclick="buyLot(\''+lot.id+'\')" style="width:100%">Aggiungi lotto - '+lot.price+'€</button>'))
+        +'</div>';
+    }).join('')+'</div>';
+  }
+  window.renderLots=renderLots;
+  function buyLot(lotId){
+    var lot=(window.lots||[]).find(function(l){ return l.id===lotId; });
+    if(!lot){ alert('Lotto non trovato'); return; }
+    var reason=lotDimmedReason(lot);
+    if(reason){ alert('Non puoi comprare questo lotto: '+reason); renderLots(); return; }
+    // Se nel carrello c'è già un singolo prodotto di questo lotto, blocca
+    var clash=(window.cartItems||[]).find(function(it){ return it.kind==='product' && lot.productIds.indexOf(it.productId)!==-1; });
+    if(clash){ alert('Nel carrello hai già il singolo "'+clash.name+'". Toglilo per comprare il lotto, o compra solo il singolo.'); return; }
+    if((window.cartItems||[]).find(function(it){ return it.kind==='lot' && it.lotId===lotId; })){ alert('Lotto già nel carrello.'); return; }
+    window.cartItems.push({name:'LOTTO: '+lot.name, price:parseFloat(lot.price||0), kind:'lot', lotId:lot.id, productIds:(lot.productIds||[]).slice()});
+    if(typeof saveCart==='function') saveCart();
+    if(typeof updateCartUI==='function') updateCartUI();
+    alert('Lotto "'+lot.name+'" aggiunto! Totale: '+(typeof cartTotal==='function'?cartTotal().toFixed(2):lot.price)+'€');
+  }
+  window.buyLot=buyLot;
+  // --- Quando un ordine va a buon fine, scarica stock online ---
+  function applySoldItems(items){
+    var changedP=false, changedL=false;
+    (items||[]).forEach(function(it){
+      if(it.kind==='lot'){
+        var lot=(window.lots||[]).find(function(l){ return l.id===it.lotId; });
+        if(lot && !lot.sold){ lot.sold=true; changedL=true; }
+        (it.productIds||[]).forEach(function(pid){
+          var p=prodById(pid); if(p && parseInt(p.stock||0)>0){ p.stock=parseInt(p.stock)-1; changedP=true; }
+        });
+      } else if(it.kind==='product' && it.productId){
+        var p2=prodById(it.productId); if(p2 && parseInt(p2.stock||0)>0){ p2.stock=parseInt(p2.stock)-1; changedP=true; }
+      } else if(it.kind==='product' && it.name){
+        // fallback per vecchi carrelli: cerca per nome
+        var p3=(window.adminProducts||[]).find(function(x){ return x.name===it.name; });
+        if(p3 && parseInt(p3.stock||0)>0){ p3.stock=parseInt(p3.stock)-1; changedP=true; }
+      }
+    });
+    if(changedP){ try{ localStorage.setItem('reboxAdminProducts', JSON.stringify(window.adminProducts)); }catch(e){} if(typeof saveProductsToCloud==='function') saveProductsToCloud(); }
+    if(changedL){ saveLotsToCloud(); }
+    if(changedP||changedL){ if(typeof renderShop==='function') renderShop(); if(typeof renderLots==='function') renderLots(); if(typeof renderAdminList==='function') renderAdminList(); }
+  }
+  window.reboxApplySoldItems=applySoldItems;
+  // --- Admin lotti ---
+  var tempLotPhoto='';
+  window.reboxSetLotPhoto=function(v){ tempLotPhoto=v; };
+  function renderLotPicker(){
+    var el=document.getElementById('lotProductPicker'); if(!el) return;
+    normProducts();
+    if(!window.adminProducts.length){ el.innerHTML='<p>Nessun prodotto. Prima aggiungi i prodotti singolarmente, poi li scegli qui per il lotto.</p>'; return; }
+    el.innerHTML=window.adminProducts.map(function(p){
+      var checked=''; return '<label style="display:flex;gap:8px;align-items:center;background:#fff;padding:8px 10px;border-radius:10px;margin:4px 0"><input type="checkbox" data-lot-prod="'+p._id+'" style="width:auto"> <b>'+String(p.name).replace(/</g,'&lt;')+'</b> — '+p.price+'€ — Stock: '+(p.stock||0)+(p.blocked?' — 🔒 nascosto':'')+'</label>';
+    }).join('');
+  }
+  window.renderLotPicker=renderLotPicker;
+  function addLot(){
+    var name=document.getElementById('lotName'); var price=document.getElementById('lotPrice'); var old=document.getElementById('lotOld');
+    var n=name?name.value.trim():''; var pr=price?parseFloat(price.value):NaN;
+    var ids=Array.prototype.slice.call(document.querySelectorAll('[data-lot-prod]:checked')).map(function(c){ return c.getAttribute('data-lot-prod'); });
+    if(!n){ alert('Metti il nome del lotto, es: Lotto Moto Raptor'); return; }
+    if(isNaN(pr)||pr<=0){ alert('Metti il prezzo del lotto'); return; }
+    if(!ids.length){ alert('Scegli almeno 1 prodotto dai prodotti inseriti'); return; }
+    var lot={id:'lot_'+Date.now(), name:n, price:pr, old:old&&old.value?parseFloat(old.value):0, photo:tempLotPhoto||'', productIds:ids, sold:false, blocked:false, createdAt:Date.now()};
+    window.lots.push(lot); saveLotsToCloud(); renderLots(); renderAdminLots(); renderLotPicker();
+    if(name) name.value=''; if(price) price.value=''; if(old) old.value=''; tempLotPhoto='';
+    var pv=document.getElementById('lotPhotoPreview'); if(pv) pv.innerHTML='';
+    var fi=document.getElementById('lotPhoto'); if(fi) fi.value='';
+    var m=document.getElementById('lotMsg'); if(m) m.textContent='✅ Lotto "'+n+'" creato con '+ids.length+' prodotti! Ora è visibile nel sito.';
+    alert('✅ Lotto creato! Ora lo vedi nel sito e nel negozio.');
+  }
+  window.addLot=addLot;
+  function renderAdminLots(){
+    var el=document.getElementById('adminLotsList'); if(!el) return;
+    if(!window.lots.length){ el.innerHTML='<p>Nessun lotto ancora. Creane uno qui sopra.</p>'; return; }
+    el.innerHTML=window.lots.map(function(lot,i){
+      var reason=lotDimmedReason(lot);
+      var names=(lot.productIds||[]).map(function(id){ var p=prodById(id); return p?p.name:'(eliminato)'; }).join(', ');
+      return '<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span><b>'+String(lot.name).replace(/</g,'&lt;')+'</b> — '+lot.price+'€ — '+(lot.sold?'🔴 VENDUTO':(reason?'⚠️ APPANNATO: '+reason:'🟢 DISPONIBILE'))+'<br><small>Contiene: '+names.replace(/</g,'&lt;')+'</small></span><span><button onclick="reboxToggleLotBlock('+i+')">'+(lot.blocked?'Mostra':'Nascondi')+'</button> <button onclick="reboxMarkLotSold('+i+')" style="background:#d32f2f;color:#fff">Segna venduto</button> <button onclick="reboxDeleteLot('+i+')" style="background:#333;color:#fff">Elimina</button></span></div>';
+    }).join('');
+  }
+  window.renderAdminLots=renderAdminLots;
+  window.reboxToggleLotBlock=function(i){ window.lots[i].blocked=!window.lots[i].blocked; saveLotsToCloud(); renderLots(); renderAdminLots(); };
+  window.reboxDeleteLot=function(i){ if(!confirm('Elimini il lotto "'+window.lots[i].name+'"? I prodotti singoli restano in vendita.')) return; window.lots.splice(i,1); saveLotsToCloud(); renderLots(); renderAdminLots(); };
+  window.reboxMarkLotSold=function(i){
+    var lot=window.lots[i]; if(!lot) return;
+    if(lot.sold){ alert('Lotto già venduto.'); return; }
+    if(!confirm('Segni "'+lot.name+'" come VENDUTO? Così si tolgono anche i prodotti singoli dentro il lotto (stock -1). Usalo quando lo vendi fuori dal sito, es: al mercatino.')) return;
+    applySoldItems([{kind:'lot', lotId:lot.id, productIds:(lot.productIds||[]).slice()}]);
+    renderAdminLots(); alert('✅ Lotto segnato venduto e prodotti scalati.');
+  };
+  // Segna singolo venduto fuori dal sito (es: mercatino) -> appanna i lotti che lo contengono
+  window.reboxMarkProductSold=function(idx){
+    var p=window.adminProducts[idx]; if(!p) return;
+    if(!confirm('Segni "'+p.name+'" come VENDUTO fuori dal sito? Lo stock scende di 1 e i lotti che lo contengono diventano NON DISPONIBILI (appannati).')) return;
+    if(parseInt(p.stock||0)>0) p.stock=parseInt(p.stock)-1;
+    try{ localStorage.setItem('reboxAdminProducts', JSON.stringify(window.adminProducts)); }catch(e){}
+    if(typeof saveProductsToCloud==='function') saveProductsToCloud();
+    if(typeof renderShop==='function') renderShop(); if(typeof renderLots==='function') renderLots(); if(typeof renderAdminList==='function') renderAdminList(); renderAdminLots();
+    alert('✅ Prodotto scalato. I lotti con questo prodotto ora sono appannati.');
+  };
+  // --- REALTIME: ricarica tutto da Supabase, mai dai dati vecchi del browser ---
+  async function refreshAllFromCloud(){
+    if(window._reboxRefreshing) return; window._reboxRefreshing=true;
+    try{
+      var pv=await cloudGet('products');
+      if(Array.isArray(pv)){ window.adminProducts=pv; normProducts(); try{ localStorage.setItem('reboxAdminProducts', JSON.stringify(window.adminProducts)); }catch(e){} }
+      var av=await cloudGet('auctions');
+      if(Array.isArray(av)){ window.auctions=av; try{ localStorage.setItem('reboxAuctions', JSON.stringify(av)); }catch(e){} }
+      var bv=await cloudGet('box_stocks');
+      if(bv && typeof bv==='object'){ window.boxStocks=bv; try{ localStorage.setItem('reboxBoxStocks', JSON.stringify(bv)); }catch(e){} }
+      var lv=await cloudGet('lots');
+      if(Array.isArray(lv)){ window.lots=lv; saveLotsLocal(); }
+      if(typeof renderShop==='function') renderShop();
+      if(typeof renderNewProducts==='function') renderNewProducts();
+      if(typeof renderAdminList==='function') renderAdminList();
+      if(typeof renderAuctions==='function') renderAuctions();
+      if(typeof renderAdminAuctions==='function') renderAdminAuctions();
+      if(typeof renderBoxStocks==='function') renderBoxStocks();
+      renderLots(); renderAdminLots(); renderLotPicker();
+    }catch(e){ console.log('refreshAll',e); }
+    window._reboxRefreshing=false;
+  }
+  window.reboxRefreshAll=refreshAllFromCloud;
+  // Override dei vecchi loader: ora leggono SEMPRE da Supabase, senza riscrivere indietro dati vecchi
+  window.loadProductsFromCloud=async function(){ await refreshAllFromCloud(); };
+  window.loadAuctionsFromCloud=async function(){ await refreshAllFromCloud(); };
+  window.syncBoxStocksFromCloud=async function(){ await refreshAllFromCloud(); };
+  window.loadLotsFromCloud=async function(){ await refreshAllFromCloud(); };
+  // Foto verticale lotto
+  document.addEventListener('change', function(e){
+    if(e.target && e.target.id==='lotPhoto'){
+      var f=e.target.files[0]; if(!f) return;
+      if(f.size>1048576){ alert('Foto troppo grande: max 1MB. Comprimila e riprova.'); e.target.value=''; return; }
+      var r=new FileReader();
+      r.onload=function(ev){ tempLotPhoto=ev.target.result; var pv=document.getElementById('lotPhotoPreview'); if(pv) pv.innerHTML='<img src="'+tempLotPhoto+'" style="width:120px;height:160px;object-fit:cover;border-radius:12px"><br><small>Foto verticale pronta: '+(f.size/1024).toFixed(0)+'KB</small>'; };
+      r.readAsDataURL(f);
+    }
+  });
+  // Avvio: prima Supabase, poi render. E ogni volta che torni sulla pagina.
+  document.addEventListener('DOMContentLoaded', function(){ refreshAllFromCloud(); });
+  document.addEventListener('visibilitychange', function(){ if(!document.hidden) refreshAllFromCloud(); });
+  window.addEventListener('pageshow', function(){ refreshAllFromCloud(); });
+  window.addEventListener('focus', function(){ refreshAllFromCloud(); });
+  setInterval(function(){ if(!window._editingProduct) refreshAllFromCloud(); }, 10000);
+  // Se un prodotto singolo è in un lotto, mostralo nella scheda prodotto
+  var _origOpen=window.openProductDetail;
+  window.openProductDetail=function(name){
+    if(typeof _origOpen==='function') _origOpen(name);
+    try{
+      var p=(window.adminProducts||[]).find(function(x){ return x.name===name; }); if(!p) return;
+      var inLots=(window.lots||[]).filter(function(l){ return !l.sold && !l.blocked && (l.productIds||[]).indexOf(p._id)!==-1; });
+      if(inLots.length){ var c=document.getElementById('productModalContent'); if(c){ var d=document.createElement('div'); d.style.cssText='background:#FFF3E6;padding:12px;border-radius:10px;margin-top:12px'; d.innerHTML='<b>📦 Fa parte anche del lotto:</b> '+inLots.map(function(l){ return String(l.name).replace(/</g,'&lt;')+' — '+l.price+'€'; }).join(', ')+'<br><small>Se compri il singolo, quel lotto diventa non disponibile. Se compri il lotto, il singolo si toglie.</small>'; c.appendChild(d); } }
+    }catch(e){}
+  };
+})();
+
+// Wrap renderAdminList per aggiungere bottone "Segna venduto" su ogni prodotto (senza toccare la funzione originale)
+(function(){ var _origRAL = window.renderAdminList; if(typeof _origRAL!=='function') return; window.renderAdminList = function(){ _origRAL(); try{ var el=document.getElementById('adminProductList'); if(!el) return; var rows = el.querySelectorAll('div'); rows.forEach(function(row, idx){ if(row.querySelector('[data-rebox-sold]')) return; var btns = row.querySelector('span:last-child'); if(!btns) return; var b=document.createElement('button'); b.setAttribute('data-rebox-sold','1'); b.textContent='Segna venduto'; b.style.cssText='background:#333;color:#fff;margin-left:4px'; b.onclick=function(){ if(typeof reboxMarkProductSold==='function') reboxMarkProductSold(idx); }; btns.appendChild(b); }); }catch(e){} }; })();
+</script></body></html>
