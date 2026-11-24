@@ -276,8 +276,23 @@ document.addEventListener('click', function(e){
 });
 
 function productCardHTML(p,idx){
-  return `<div class="card" style="cursor:pointer">${p.isNew?'<span style="background:#FF5722;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:900">✨ NOVITÀ</span> ':''}${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`;
+  return `<div class="card" style="cursor:pointer">${p.isNew?'<span style="background:#FF5722;color:#fff;padding:4px 10px;border-radius:20px;font-size:12px;font-weight:900">✨ NOVITÀ</span> ':''}${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button type="button" class="buyBtn" data-pid="'+(p._id||'')+'" data-name="'+String(p.name).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" data-price="'+p.price+'" data-qty="qty-prod-'+idx+'">Aggiungi al carrello</button>'}</div>`;
 }
+
+// Un solo ascolto per tutti i bottoni 'Aggiungi al carrello': niente più onclick con il nome incollato,
+// così nomi con apostrofi o virgolette non rompono più il bottone.
+document.addEventListener('click', function(e){
+  var b = e.target && e.target.closest ? e.target.closest('.buyBtn') : null;
+  if(!b) return;
+  var pid = b.getAttribute('data-pid')||'';
+  var prod = null;
+  if(pid && typeof prodById==='function'){ try{ prod = prodById(pid); }catch(err){} }
+  if(!prod && typeof adminProducts!=='undefined'){ var nm=b.getAttribute('data-name')||''; prod = adminProducts.find(function(x){ return x.name===nm; }); }
+  var qEl = document.getElementById(b.getAttribute('data-qty')||'');
+  var qty = qEl ? qEl.value : 1;
+  if(prod) buy(prod.name, prod.price, qty);
+  else buy(b.getAttribute('data-name')||'', b.getAttribute('data-price')||'', qty);
+});
 function searchProd(){
   let q=(document.getElementById('q')?.value||'').toLowerCase().trim();
   let grid=document.getElementById('shopGrid'); if(!grid) return;
@@ -343,7 +358,7 @@ function renderNewProducts(){
   if(!box) return;
   let vis=adminProducts.filter(p=>!p.blocked);
   if(vis.length===0) return;
-  box.innerHTML='<h3>✨ Novità</h3><div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button onclick="buy(\''+p.name+'\','+p.price+',document.getElementById(\'qty-prod-\'+idx).value)">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
+  box.innerHTML='<h3>✨ Novità</h3><div class="grid">'+vis.map((p,idx)=>`<div class="card">${p.photo?`<img src="${p.photo}" style="width:100%;height:160px;object-fit:cover;border-radius:12px">`:''}<span class="catlabel">${p.cat}</span><h3>${p.name}</h3><span class="old">${p.old}€</span> <span class="price">${p.price}€</span><p>Stock: <b>${p.stock}</b></p>${p.stock==0?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">ESAURITO</div>':'<div style="display:flex;gap:6px;align-items:center;justify-content:center;margin:8px 0">Quantità: <button type="button" onclick="changeQty(\'qty-prod-\'+idx,-1,\'+p.stock+\')" style="width:32px">-</button> <input id="qty-prod-\'+idx" type="number" min="1" max="\'+p.stock+\'" value="1" style="width:50px;padding:6px;text-align:center;border:1px solid #ddd;border-radius:8px"> <button type="button" onclick="changeQty(\'qty-prod-\'+idx,1,\'+p.stock+\')" style="width:32px">+</button></div><button type="button" class="buyBtn" data-pid="'+(p._id||'')+'" data-name="'+String(p.name).replace(/&/g,'&amp;').replace(/"/g,'&quot;')+'" data-price="'+p.price+'" data-qty="qty-prod-'+idx+'">Aggiungi al carrello</button>'}</div>`).join('')+'</div>';
 }
 // Mostra lista appena entri in Admin
 
