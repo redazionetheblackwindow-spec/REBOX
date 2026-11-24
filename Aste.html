@@ -609,16 +609,20 @@ function renderPayPalButtons(finalTotal){
         return actions.order.create({ purchase_units:[{ amount:{ value: finalTotal, currency_code:'EUR' }, description:'Ordine REBOX - '+cartItems.map(x=>x.name).join(', ') }] });
       },
       onApprove: function(data, actions){
-        return actions.order.capture().then(function(details){
+        return actions.order.capture().then(async function(details){
           let msg=document.getElementById('checkoutMsg');
           msg.textContent='✅ Pagamento riuscito! Grazie '+details.payer.name.given_name+'. ID PayPal: '+details.id+'. Ti abbiamo mandato la conferma.';
           msg.style.color='green';
-          // Salva ordine
-          let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');
-          orders.push({id:details.id, items:cartItems, total:finalTotal, name:document.getElementById('custName').value, addr:document.getElementById('custAddr').value, date:new Date().toLocaleString('it-IT')});
-          localStorage.setItem('reboxOrders', JSON.stringify(orders)); sendOrderToSupabase({id:details.id, items:cartItems, total:finalTotal, name:document.getElementById('custName').value, addr:document.getElementById('custAddr').value, email:document.getElementById('custEmail')?document.getElementById('custEmail').value:''});
-          cartItems=[]; saveCart(); updateCartUI();
-          alert('Pagamento riuscito! Ordine confermato. ID: '+details.id);
+          // Salva ordine: 1) in questo browser 2) su Supabase 3) scala lo stock PRIMA di svuotare
+let order={id:details.id, items:JSON.parse(JSON.stringify(cartItems)), total:finalTotal, name:document.getElementById('custName').value, addr:document.getElementById('custAddr').value, email:document.getElementById('custEmail')?document.getElementById('custEmail').value:'', date:new Date().toLocaleString('it-IT'), status:'pagato'};
+let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');
+if(!orders.some(function(o){ return o.id===order.id; })) orders.push(order);
+localStorage.setItem('reboxOrders', JSON.stringify(orders));
+let savedOnCloud = await sendOrderToSupabase(order);
+if(typeof applySoldItems==='function') applySoldItems(order.items);
+cartItems=[]; saveCart(); updateCartUI();
+if(savedOnCloud){ msg.textContent='✅ Pagamento riuscito! Grazie '+details.payer.name.given_name+'. ID PayPal: '+details.id+'. Ordine registrato: lo vedo in Admin.'; alert('Pagamento riuscito! Ordine confermato e registrato. ID: '+details.id); }
+else { msg.textContent='✅ Pagamento riuscito! ID PayPal: '+details.id+'. Tieni questo ID: se non ti arriva conferma, scrivici con questo codice.'; alert('Pagamento riuscito! ID: '+details.id+'. ATTENZIONE: il salvataggio online non è riuscito, ma il pagamento è andato. Tieni questo ID e scrivici se non ti arriva conferma.'); }
         });
       },
       onError: function(err){ alert('Errore PayPal: '+err.message+' - Controlla Client ID Live in Admin.'); }
@@ -643,25 +647,13 @@ window.addEventListener('load', forceShowCart);
 
 async function sendOrderToSupabase(order){
   try{
-    let url = localStorage.getItem('sbUrl')||'';
-    let key = localStorage.getItem('sbKey')||'';
-    if(!url||!key) return false;
-    let res = await fetch(url.replace(/\/$/,'')+'/rest/v1/orders', {
-      method:'POST',
-      headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'return=minimal'},
-      body: JSON.stringify({items:order.items, total:order.total, customer_name:order.name, customer_email:order.email||'', customer_address:order.addr||'', paypal_id:order.id, status:'pagato'})
-    });
-    return res.ok;
+    let url = localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    let key = localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return false;
+    let get = await fetch(url.replace(/\/$/,'')+'/rest/v1/rebox_settings?id=eq.orders',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let gj = await get.json(); let all = (gj&&gj[0]&&Array.isArray(gj[0].value)) ? gj[0].value : []; if(!all.some(function(o){ return o.id===order.id; })) all.push(order); let res = await fetch(url.replace(/\/$/,'')+'/rest/v1/rebox_settings', { method:'POST', headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'}, body: JSON.stringify({id:'orders', value:all}) }); return res.ok;
   }catch(e){ console.log('Supabase ordine errore',e); return false; }
 }
-function loadOrders(){
-  let el=document.getElementById('ordersList');
-  if(!el) return;
-  let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');
-  if(orders.length===0){ el.innerHTML='Nessun ordine ancora in questo browser. Controlla anche la tua email PayPal e Supabase > Table Editor > orders.'; return; }
-  el.innerHTML = orders.map(o=>`<div style="border-bottom:1px solid #eee;padding:10px 0"><b>Ordine ${o.id}</b> - ${o.date}<br>${o.items.map(i=>i.name).join(', ')} - Totale: <b>${o.total}€</b><br>Cliente: ${o.name} - ${o.addr}</div>`).join('') + '<p><b>Totale ordini in questo browser: '+orders.length+'</b></p>';
-}
-// Quando un ordine va a buon fine, salva anche su Supabase
+async function loadOrders(){   let el=document.getElementById('ordersList');   if(!el) return;   let orders=JSON.parse(localStorage.getItem('reboxOrders')||'[]');   try{     let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';     let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';     if(url&&key&&url.indexOf('TUO-PROGETTO')===-1){       let r=await fetch(url.replace(/\/$/,'')+'/rest/v1/rebox_settings?id=eq.orders',{headers:{'apikey':key,'Authorization':'Bearer '+key}});       let j=await r.json();       if(j&&j[0]&&Array.isArray(j[0].value)){         j[0].value.forEach(function(o){ if(!orders.some(function(x){ return x.id===o.id; })) orders.push(o); });         localStorage.setItem('reboxOrders', JSON.stringify(orders));       }     }   }catch(e){ console.log('load ordini cloud',e); }   if(orders.length===0){ el.innerHTML='Nessun ordine ancora. Quando qualcuno paga, apparirà qui (anche da un altro dispositivo, se Supabase è collegato).'; return; }   el.innerHTML = orders.map(o=>`<div style="border-bottom:1px solid #eee;padding:10px 0"><b>Ordine ${o.id}</b> - ${o.date||''}<br>${(o.items||[]).map(i=>i.name).join(', ')} - Totale: <b>${o.total}€</b><br>Cliente: ${o.name||''} - ${o.addr||''}${o.email?(' - '+o.email):''} - ${o.status||'pagato'}</div>`).join('') + '<p><b>Totale ordini: '+orders.length+'</b></p>'; } // Quando un ordine va a buon fine, salva anche su Supabase
 let _origPayFake = null;
 
 var boxStocks = JSON.parse(localStorage.getItem('reboxBoxStocks')||'{"Piccolo":48,"Medio":42,"Grande":28}');
@@ -733,7 +725,27 @@ async function saveUsersToCloud(){
   }catch(e){ console.log('save utenti cloud',e); }
 }
 
-async function loadAuctionsFromCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.auctions',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let j=await r.json(); if(j&&j[0]&&Array.isArray(j[0].value)){ window._auctionsCloudLoaded=true; auctions=j[0].value; localStorage.setItem('reboxAuctions',JSON.stringify(auctions)); renderAuctions(); } }catch(e){ console.log('load aste cloud',e); } }
+// REBOX: quando rileggo le aste, FONDO le offerte invece di sovrascriverle.
+// Così un dispositivo con dati vecchi non può più cancellare l'offerta fatta da un altro.
+// Regole: dal cloud prendiamo chiuso/fine/link (così Riapri/Chiudi comandano),
+// dalle offerte prendiamo l'UNIONE di cloud + locale (nessuna offerta si perde mai).
+function reboxMergeAuctions(localA, cloudA){
+  if(!Array.isArray(cloudA)) return localA;
+  var byId={}; (localA||[]).forEach(function(a){ if(a&&a.id!=null) byId[a.id]=a; });
+  var merged = cloudA.map(function(c){
+    var l = byId[c.id]; if(!l) return c;
+    var seen={}, bids=[];
+    (c.bids||[]).concat(l.bids||[]).forEach(function(b){ var k=(b.who||'')+'|'+b.amt+'|'+(b.when||''); if(!seen[k]){ seen[k]=1; bids.push(b); } });
+    bids.sort(function(x,y){ return (x.amt||0)-(y.amt||0); });
+    var m = Object.assign({}, l, c);
+    m.bids = bids;
+    m.bid = Math.max(c.bid||0, l.bid||0, bids.length ? (bids[bids.length-1].amt||0) : 0);
+    return m;
+  });
+  (localA||[]).forEach(function(a){ if(!cloudA.some(function(c){ return c.id===a.id; })) merged.push(a); });
+  return merged;
+}
+async function loadAuctionsFromCloud(){ try{ let url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||''; let key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||''; if(!url||!key||url.includes('TUO-PROGETTO')) return; let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.auctions',{headers:{'apikey':key,'Authorization':'Bearer '+key}}); let j=await r.json(); if(j&&j[0]&&Array.isArray(j[0].value)){ window._auctionsCloudLoaded=true; auctions=reboxMergeAuctions(auctions, j[0].value); localStorage.setItem('reboxAuctions',JSON.stringify(auctions)); renderAuctions(); } }catch(e){ console.log('load aste cloud',e); } }
 document.addEventListener('DOMContentLoaded',()=>{ setTimeout(loadAuctionsFromCloud,800); });
 var auctionSyncInterval=setInterval(function(){ if(typeof loadAuctionsFromCloud==='function') loadAuctionsFromCloud(); }, 10000);
 function fmtTime(ms){
@@ -764,7 +776,7 @@ function renderAuctions(){
   }).join('')+'</div>';
 }
 async function placeBid(i){
-  if(!requireLoginForBid()) return;
+  if(!requireLoginForBid()) return; window._lastBidAuctionId = auctions[i] ? auctions[i].id : null;
   try{ await loadAuctionsFromCloud(); }catch(e){}
   // Dopo il ricaricamento, ritrova l'asta per id (l'indice potrebbe essere cambiato)
   if(auctions[i] && auctions[i].id && window._lastBidAuctionId){ var _found=auctions.findIndex(function(x){return x.id===window._lastBidAuctionId;}); if(_found!==-1) i=_found; }
@@ -776,7 +788,7 @@ async function placeBid(i){
   a.bid+=5;
   a.bids.push({who:name, amt:a.bid, when:'ora', email: currentUser?currentUser.email:'', phone: currentUser?currentUser.phone:''});
   saveAuctions(); renderAuctions(); renderAdminAuctions();
-  await saveAuctionsToCloud(); alert(name+', la tua offerta di '+a.bid+'€ è registrata e sincronizzata! Ora la vedono anche da altri PC e telefoni. Sei il più alto per ora.');
+  await saveAuctionsToCloud(); try{ await loadAuctionsFromCloud(); }catch(e){} var _chk=auctions.find(function(x){ return x.id===a.id; }); var _ok=_chk && (_chk.bids||[]).some(function(b){ return b.amt===a.bid && b.who===name; }); if(!_ok){ await saveAuctionsToCloud(); try{ await loadAuctionsFromCloud(); }catch(e){} _chk=auctions.find(function(x){ return x.id===a.id; }); _ok=_chk && (_chk.bids||[]).some(function(b){ return b.amt===a.bid && b.who===name; }); } alert(name+', la tua offerta di '+a.bid+'€ è '+(_ok ? 'registrata e VERIFICATA su Supabase! Ora la vedono anche da altri PC e telefoni.' : 'registrata qui ma la verifica su Supabase non è riuscita. Ricarica la pagina e controlla le ultime 3 offerte.')+' Sei il più alto per ora.');
 }
 function setAuctionYT(i){
   let v=document.getElementById('ytInput'+i).value.trim();
