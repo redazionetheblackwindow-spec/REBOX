@@ -181,7 +181,7 @@ async function loadProductsFromCloud(){
     let r=await fetch(url+'/rest/v1/rebox_settings?id=eq.products',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
     let j=await r.json();
     if(j&&j[0]&&Array.isArray(j[0].value)){ window._auctionsCloudLoaded=true;
-      adminProducts=j[0].value;
+      adminProducts=j[0].value; window.adminProducts=adminProducts;
       localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts));
       if(typeof renderAdminList==='function') renderAdminList();
       if(typeof renderNewProducts==='function') renderNewProducts();
@@ -295,7 +295,7 @@ function addProduct(){
   let price=document.getElementById('newPrice').value;
   let stock=document.getElementById('newStock').value;
   if(!name||!price){ alert('Metti almeno Nome e Prezzo REBOX'); return; }
-  let isNew=document.getElementById('newIsNew')?.checked||false; if(window._editingProduct!==undefined && window._editingProduct!==null){ var _i=window._editingProduct; var _oldIsNew=adminProducts[_i].isNew; var _oldAt=adminProducts[_i].newAt; adminProducts[_i]={cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:adminProducts[_i].blocked,photo:adminProducts[_i].photo||tempProductPhoto||'',desc:document.getElementById('newDesc')?.value.trim()||'',specs:document.getElementById('newSpecs')?.value.trim()||'',isNew:document.getElementById('newIsNew')?.checked||false,newAt:document.getElementById('newIsNew')?.checked?( _oldIsNew?_oldAt:Date.now()):0}; if(adminProducts[_i].isNew) enforceNovitaLimit(); window._editingProduct=null; var _b=document.querySelector('button[onclick="addProduct()"]'); if(_b) _b.textContent='Aggiungi prodotto al negozio'; localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); document.getElementById('addMsg').textContent='Modifiche salvate!'; document.getElementById('newName').value=''; var _dd=document.getElementById('newDesc'); if(_dd) _dd.value=''; var _ss=document.getElementById('newSpecs'); if(_ss) _ss.value=''; renderAdminList(); renderNewProducts(); return; } var _desc=document.getElementById('newDesc')?.value.trim()||''; var _specs=document.getElementById('newSpecs')?.value.trim()||''; adminProducts.push({_id:'p_'+String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)+'_'+Date.now().toString(36),cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||'',desc:_desc,specs:_specs,isNew:isNew,newAt:isNew?Date.now():0}); if(isNew) enforceNovitaLimit(); tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
+  let isNew=document.getElementById('newIsNew')?.checked||false; if(window._editingProduct!==undefined && window._editingProduct!==null){ var _i=window._editingProduct; var _oldIsNew=adminProducts[_i].isNew; var _oldAt=adminProducts[_i].newAt; adminProducts[_i]={_id:adminProducts[_i]._id||('p_'+String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)),cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:adminProducts[_i].blocked,photo:adminProducts[_i].photo||tempProductPhoto||'',desc:document.getElementById('newDesc')?.value.trim()||'',specs:document.getElementById('newSpecs')?.value.trim()||'',isNew:document.getElementById('newIsNew')?.checked||false,newAt:document.getElementById('newIsNew')?.checked?( _oldIsNew?_oldAt:Date.now()):0}; if(adminProducts[_i].isNew) enforceNovitaLimit(); window._editingProduct=null; var _b=document.querySelector('button[onclick="addProduct()"]'); if(_b) _b.textContent='Aggiungi prodotto al negozio'; localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud(); document.getElementById('addMsg').textContent='Modifiche salvate!'; document.getElementById('newName').value=''; var _dd=document.getElementById('newDesc'); if(_dd) _dd.value=''; var _ss=document.getElementById('newSpecs'); if(_ss) _ss.value=''; renderAdminList(); renderNewProducts(); return; } var _desc=document.getElementById('newDesc')?.value.trim()||''; var _specs=document.getElementById('newSpecs')?.value.trim()||''; adminProducts.push({_id:'p_'+String(name).toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60)+'_'+Date.now().toString(36),cat:cat,name:name,old:oldP||price,price:price,stock:stock||0,blocked:false,photo:tempProductPhoto||'',desc:_desc,specs:_specs,isNew:isNew,newAt:isNew?Date.now():0}); if(isNew) enforceNovitaLimit(); tempProductPhoto=''; let pv2=document.getElementById('newPhotoPreview'); if(pv2) pv2.innerHTML=''; let fi=document.getElementById('newPhoto'); if(fi) fi.value='';
   localStorage.setItem('reboxAdminProducts',JSON.stringify(adminProducts)); saveProductsToCloud();
   document.getElementById('addMsg').textContent='✅ '+name+' aggiunto in '+cat+'! Ora è visibile nel negozio.';
   document.getElementById('newName').value=''; var _d=document.getElementById('newDesc'); if(_d) _d.value=''; var _s=document.getElementById('newSpecs'); if(_s) _s.value=''; renderAdminList(); renderNewProducts();
@@ -753,6 +753,7 @@ function fmtTime(ms){
   let s=Math.floor(ms/1000); let h=Math.floor(s/3600); let m=Math.floor((s%3600)/60); let sec=s%60;
   return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0')+':'+String(sec).padStart(2,'0');
 }
+function maskBidderName(n){ n=String(n||'Anonimo').trim(); if(!n) return 'Anonimo'; var parts=n.split(/\s+/).filter(Boolean); if(parts.length<=1) return parts[0]||'Anonimo'; return parts[0]+' '+parts[parts.length-1].charAt(0).toUpperCase()+'.'; }
 function renderAuctions(){
   let grid=document.getElementById('auctionsGrid'); if(!grid) return; if(!auctions || auctions.length===0){ grid.innerHTML='<p style="background:#fff;padding:14px;border-radius:12px;text-align:center">Nessuna asta al momento. Torna presto!</p>'; return; }
   grid.innerHTML='<div class="grid">'+auctions.map((a,i)=>{
@@ -765,12 +766,12 @@ function renderAuctions(){
     return `<div class="card">
       <h3>Asta: ${a.name}</h3>
       <p>Offerta attuale: <b>${a.bid}€</b> • Finisce tra: <b class="auctionTimer" data-i="${i}">`+fmtTime(a.end-Date.now())+`</b></p>
-      ${a.closed?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">❌ ASTA CHIUSA - Vincitore: '+(a.bids.length?a.bids[a.bids.length-1].who:'-')+' con '+a.bid+'€</div>':''}
+      ${a.closed?'<div style="background:#ddd;padding:10px;border-radius:10px;text-align:center;font-weight:900">❌ ASTA CHIUSA - Vincitore: '+(a.bids.length?maskBidderName(a.bids[a.bids.length-1].who):'-')+' con '+a.bid+'€</div>':''}
       <input id="ytInput${i}" placeholder="https://www.youtube.com/watch?v=..." value="${a.yt||''}">
       <button onclick="setAuctionYT(${i})">Guarda il teaser</button>
       <div id="ytBox${i}">${ytId?`<iframe width="100%" height="200" src="https://www.youtube.com/embed/${ytId}" frameborder="0" allowfullscreen></iframe>`:''}</div>
       <p style="font-size:13px">TEASER - Vedi un assaggio, non tutto.</p>
-      <div style="background:#FFF3E6;padding:10px;border-radius:10px;margin:8px 0"><b>Ultime 3 offerte:</b><br>${last3.length?last3.map(b=>`• <b>${b.who}</b> - ${b.amt}€ <span style="opacity:.6">(${b.when})</span>`).join('<br>'):'Nessuna offerta ancora'}</div>
+      <div style="background:#FFF3E6;padding:10px;border-radius:10px;margin:8px 0"><b>Ultime 3 offerte:</b><br>${last3.length?last3.map(b=>`• <b>${maskBidderName(b.who)}</b> - ${b.amt}€ <span style="opacity:.6">(${b.when})</span>`).join('<br>'):'Nessuna offerta ancora'}</div>
       ${a.closed?'':`<input id="bidName${i}" placeholder="Il tuo nome - es: Marco"><button onclick="placeBid(${i})" style="width:100%">Fai un'offerta +5€ → ${a.bid+5}€</button>`}
     </div>`;
   }).join('')+'</div>';
@@ -816,7 +817,7 @@ function deleteAuction(i){
 function renderAdminAuctions(){
   let el=document.getElementById('adminAuctionsList'); if(!el) return;
   if(auctions.length===0){ el.innerHTML='Nessuna asta. Creane una qui sopra.'; return; }
-  el.innerHTML=auctions.map((a,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span><b>${a.name}</b> - Ora: ${a.bid}€ - ${a.closed?'🔴 CHIUSA':'🟢 APERTA'} - Scade tra: ${fmtTime(a.end-Date.now())}</span><span><button onclick="closeAuction(${i})">Chiudi</button> <button onclick="reopenAuction(${i})">Riapri 24h</button> <button onclick="deleteAuction(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span></div>`).join('');
+  el.innerHTML=auctions.map((a,i)=>`<div style="display:flex;justify-content:space-between;gap:8px;padding:8px;border-bottom:1px solid #eee;flex-wrap:wrap"><span><b>${a.name}</b> - Ora: ${a.bid}€ - ${a.closed?'🔴 CHIUSA':'🟢 APERTA'} - Scade tra: ${fmtTime(a.end-Date.now())}</span><span><button onclick="closeAuction(${i})">Chiudi</button> <button onclick="reopenAuction(${i})">Riapri 24h</button> <button onclick="deleteAuction(${i})" style="background:#d32f2f;color:#fff">Elimina</button></span>${(a.bids&&a.bids.length)?'<div style="background:#FFF3E6;padding:8px;border-radius:8px;margin-top:6px;font-size:13px">🔒 <b>Solo Admin - Offerte con nome completo:</b><br>'+a.bids.map(function(b){ return '• <b>'+String(b.who||'').replace(/</g,'&lt;')+'</b> - '+b.amt+'€'+(b.email?(' - '+String(b.email).replace(/</g,'&lt;')):'')+(b.phone?(' - '+String(b.phone).replace(/</g,'&lt;')):''); }).join('<br>')+'</div>':''}</div>`).join('');
 }
 // Timer che scende ogni secondo
 setInterval(()=>{
@@ -942,7 +943,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
     try{ var r=await fetch(c.url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':c.key,'Authorization':'Bearer '+c.key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:id,value:val})}); return r.ok; }catch(e){ return false; }
   }
   function slugId(name, i){ return 'p_'+String(name||'prod').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,60); }
-  function normProducts(){
+  function normProducts(){ if((!window.adminProducts||!window.adminProducts.length) && typeof adminProducts!=='undefined' && adminProducts.length) window.adminProducts=adminProducts;
     if(!Array.isArray(window.adminProducts)) window.adminProducts=[];
     window.adminProducts.forEach(function(p,i){ if(!p._id) p._id=slugId(p.name,i); if(typeof p.stock==='undefined') p.stock=0; });
   }
@@ -960,9 +961,10 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
     return window.lots;
   }
   window.loadLotsFromCloud = loadLotsFromCloud;
-  function prodById(id){ normProducts(); for(var i=0;i<window.adminProducts.length;i++){ var p=window.adminProducts[i]; if(p._id===id||p.name===id) return p; } return null; }
+  function prodById(id){ normProducts(); for(var i=0;i<window.adminProducts.length;i++){ var p=window.adminProducts[i]; if(p._id===id||p.name===id) return p; } var base=String(id||'').replace(/_[a-z0-9]+$/,''); if(base && base!==String(id)){ for(var j=0;j<window.adminProducts.length;j++){ var q=window.adminProducts[j]; if(q._id && String(q._id).replace(/_[a-z0-9]+$/,'')===base) return q; } } return null; }
   window.reboxProdById = prodById;
-  function lotDimmedReason(lot){
+  function healLotIds(){ var changed=false; (window.lots||[]).forEach(function(lot){ (lot.productIds||[]).forEach(function(id,idx){ var p=prodById(id); if(p && p._id && p._id!==id){ lot.productIds[idx]=p._id; changed=true; } }); }); if(changed && typeof saveLotsToCloud==='function') saveLotsToCloud(); return changed; }
+function lotDimmedReason(lot){
     if(!lot) return 'Lotto non trovato';
     if(lot.sold) return 'Lotto già venduto';
     if(lot.blocked) return 'Lotto nascosto da Admin';
@@ -976,7 +978,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
     return '';
   }
   window.reboxLotDimmedReason = lotDimmedReason;
-  function renderLots(){
+  function renderLots(){ if(typeof healLotIds==='function') healLotIds();
     var grid=document.getElementById('lotsGrid'); if(!grid) return;
     var vis=(window.lots||[]).filter(function(l){ return !l.blocked; });
     if(!vis.length){ grid.innerHTML='<p style="background:#fff;padding:14px;border-radius:12px;text-align:center">Nessun lotto al momento. Torna presto!</p>'; return; }
@@ -1061,7 +1063,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
     alert('✅ Lotto creato! Ora lo vedi nel sito e nel negozio.');
   }
   window.addLot=addLot;
-  function renderAdminLots(){
+  function renderAdminLots(){ if(typeof healLotIds==='function') healLotIds();
     var el=document.getElementById('adminLotsList'); if(!el) return;
     if(!window.lots.length){ el.innerHTML='<p>Nessun lotto ancora. Creane uno qui sopra.</p>'; return; }
     el.innerHTML=window.lots.map(function(lot,i){
