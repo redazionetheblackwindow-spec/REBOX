@@ -459,13 +459,16 @@ function sendFeedback(){
 try{ feedbacks = JSON.parse(localStorage.getItem('reboxFeedback')||'[]'); }catch(e){ feedbacks=[]; }
 document.addEventListener('DOMContentLoaded', function(){ renderFeedback(); setTimeout(loadFeedbackFromCloud, 900); });
 
+var _shopFilter=null; // Cosa stai guardando in Negozio: null=Novità, 'ALL'=Tutte, altrimenti nome categoria. La sincronizzazione ogni 20s ridisegna QUESTA vista, non torna alle Novità.
 function renderShop(){
   let grid=document.getElementById('shopGrid');
   let bar=document.getElementById('catBar');
   if(!grid) return;
   let vis=adminProducts.filter(p=>!p.blocked);
   let cats=[...new Set(vis.map(p=>p.cat))];
-  if(bar) bar.innerHTML=cats.map(c=>`<button onclick="filterCat('${c}')">${c}</button>`).join('')+' <button onclick="showAllProducts()">Tutte</button>';
+  if(bar) bar.innerHTML=cats.map(c=>`<button onclick="filterCat('${c}')" style="${c===_shopFilter?'background:#FF9800;color:#fff':''}">${c}</button>`).join('')+' <button onclick="showAllProducts()" style="'+(_shopFilter==='ALL'?'background:#FF9800;color:#fff':'')+'">Tutte</button>';
+  if(_shopFilter==='ALL'){ grid.innerHTML='<h3>🛍️ Tutti gli articoli - '+vis.length+'</h3><div class="grid">'+vis.map((p,idx)=>productCardHTML(p,idx)).join('')+'</div>'; return; }
+  if(_shopFilter){ var f=vis.filter(function(p){ return p.cat===_shopFilter; }); grid.innerHTML='<h3>'+_shopFilter+' - '+f.length+' articoli</h3><div class="grid">'+f.map(function(p,idx){ return productCardHTML(p,idx); }).join('')+'</div>'; return; }
   let news=vis.filter(p=>p.isNew);
   if(news.length===0){
     grid.innerHTML='<div style="background:#FFF3E6;padding:20px;border-radius:14px;text-align:center"><h3>✨ NOVITÀ</h3><p>Ancora nessuna novità.</p><p>Usa la ricerca o scegli una categoria.</p></div>';
@@ -474,16 +477,8 @@ function renderShop(){
   let cards=news.map((p,idx)=>productCardHTML(p,idx)).join('');
   grid.innerHTML='<h3>✨ NOVITÀ - Scorrono in home</h3><div class="novita-wrap"><div class="novita-track">'+cards+cards+'</div></div><p style="text-align:center;font-size:13px"></p>';
 }
-function showAllProducts(){
-  let grid=document.getElementById('shopGrid'); if(!grid) return;
-  let vis=adminProducts.filter(p=>!p.blocked);
-  grid.innerHTML='<h3>🛍️ Tutti gli articoli - '+vis.length+'</h3><div class="grid">'+vis.map((p,idx)=>productCardHTML(p,idx)).join('')+'</div>';
-}
-function filterCat(c){
-  let grid=document.getElementById('shopGrid');
-  let vis=adminProducts.filter(p=>!p.blocked && p.cat===c);
-  grid.innerHTML='<h3>'+c+' - '+vis.length+' articoli</h3><div class="grid">'+vis.map((p,idx)=>productCardHTML(p,idx)).join('')+'</div>';
-}
+function showAllProducts(){ _shopFilter='ALL'; renderShop(); }
+function filterCat(c){ _shopFilter=c; renderShop(); }
 let _oldRenderNew = renderNewProducts;
 renderNewProducts = function(){ renderShop(); if(typeof renderAdminList==='function') renderAdminList(); };
 document.addEventListener('DOMContentLoaded', ()=>{ renderShop(); });
