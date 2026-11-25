@@ -239,3 +239,21 @@ document.addEventListener('DOMContentLoaded', function(){
     }
   }catch(e){ console.log('dedupe save utenti',e); }
 });
+
+// ===== REBOX HOME: togli il titolo Novità duplicato =====
+// Nella home c'erano due titoli per la stessa sezione: quello fisso in HTML
+// ("Novità - scorrono qui") e quello che scrive renderShop ("NOVITÀ - Scorrono in home").
+// Resta solo quello del carosello. Toglie anche il secondo bottone "Vedi tutto" duplicato.
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    var sec=document.getElementById('novita');
+    if(sec){
+      var h2=sec.querySelector('h2');
+      if(h2 && h2.textContent.indexOf('Novità')!==-1) h2.remove();
+      var seen=false;
+      Array.prototype.forEach.call(sec.querySelectorAll('a[href="negozio.html"]'), function(a){
+        if(seen){ var p=a.parentNode; if(p) p.remove(); } else seen=true;
+      });
+    }
+  }catch(e){ console.log('fix novita duplicata',e); }
+});
