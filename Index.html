@@ -1122,6 +1122,7 @@ function lotDimmedReason(lot){
       if(typeof renderAdminAuctions==='function') renderAdminAuctions();
       if(typeof renderBoxStocks==='function') renderBoxStocks();
       renderLots(); renderAdminLots(); renderLotPicker();
+      if(typeof searchProd==='function'){ var _qv=(document.getElementById('q')||{}).value||''; if(_qv.trim()) searchProd(); }
     }catch(e){ console.log('refreshAll',e); }
     window._reboxRefreshing=false;
   }
