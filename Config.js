@@ -244,7 +244,9 @@ document.addEventListener('DOMContentLoaded', function(){
 // Nella home c'erano due titoli per la stessa sezione: quello fisso in HTML
 // ("Novità - scorrono qui") e quello che scrive renderShop ("NOVITÀ - Scorrono in home").
 // Resta solo quello del carosello. Toglie anche il secondo bottone "Vedi tutto" duplicato.
-document.addEventListener('DOMContentLoaded', function(){
+// Gira subito, al caricamento pagina e 1,5 secondi dopo, così funziona anche se
+// il browser aveva già caricato la pagina o il carosello riscrive la sezione.
+function reboxFixNovitaDup(){
   try{
     var sec=document.getElementById('novita');
     if(sec){
@@ -256,4 +258,7 @@ document.addEventListener('DOMContentLoaded', function(){
       });
     }
   }catch(e){ console.log('fix novita duplicata',e); }
-});
+}
+if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', reboxFixNovitaDup); }
+else { reboxFixNovitaDup(); }
+window.addEventListener('load', function(){ reboxFixNovitaDup(); setTimeout(reboxFixNovitaDup, 1500); });
