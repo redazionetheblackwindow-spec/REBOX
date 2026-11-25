@@ -243,22 +243,39 @@ document.addEventListener('DOMContentLoaded', function(){
 // ===== REBOX HOME: togli il titolo Novità duplicato =====
 // Nella home c'erano due titoli per la stessa sezione: quello fisso in HTML
 // ("Novità - scorrono qui") e quello che scrive renderShop ("NOVITÀ - Scorrono in home").
-// Resta solo quello del carosello. Toglie anche il secondo bottone "Vedi tutto" duplicato.
-// Gira subito, al caricamento pagina e 1,5 secondi dopo, così funziona anche se
-// il browser aveva già caricato la pagina o il carosello riscrive la sezione.
+// Resta solo quello del carosello.
+// Per i pulsanti "Vedi tutto il negozio" la ricerca ora è in TUTTA la pagina per testo,
+// non solo dentro la sezione Novità: resta solo il primo, ovunque sia il secondo.
+// Gira subito, al caricamento pagina, 1,5 secondi dopo e ogni volta che la pagina
+// aggiunge qualcosa, così becca il duplicato anche se ricompare dopo.
 function reboxFixNovitaDup(){
   try{
     var sec=document.getElementById('novita');
     if(sec){
       var h2=sec.querySelector('h2');
       if(h2 && h2.textContent.indexOf('Novità')!==-1) h2.remove();
-      var seen=false;
-      Array.prototype.forEach.call(sec.querySelectorAll('a[href="negozio.html"]'), function(a){
-        if(seen){ var p=a.parentNode; if(p) p.remove(); } else seen=true;
-      });
+    }
+    var btns=[];
+    Array.prototype.forEach.call(document.querySelectorAll('a'), function(a){
+      if(a.textContent && a.textContent.indexOf('Vedi tutto il negozio')!==-1) btns.push(a);
+    });
+    for(var i=1;i<btns.length;i++){
+      var p=btns[i].parentNode;
+      if(p) p.remove();
     }
   }catch(e){ console.log('fix novita duplicata',e); }
 }
 if(document.readyState==='loading'){ document.addEventListener('DOMContentLoaded', reboxFixNovitaDup); }
 else { reboxFixNovitaDup(); }
 window.addEventListener('load', function(){ reboxFixNovitaDup(); setTimeout(reboxFixNovitaDup, 1500); });
+try{
+  if(window.MutationObserver){
+    var _reboxDupTimer=null;
+    var _reboxDupObs=new MutationObserver(function(){
+      if(_reboxDupTimer) return;
+      _reboxDupTimer=setTimeout(function(){ _reboxDupTimer=null; reboxFixNovitaDup(); }, 300);
+    });
+    if(document.body) _reboxDupObs.observe(document.body, {childList:true, subtree:true});
+    else document.addEventListener('DOMContentLoaded', function(){ _reboxDupObs.observe(document.body, {childList:true, subtree:true}); });
+  }
+}catch(e){ console.log('fix novita observer',e); }
