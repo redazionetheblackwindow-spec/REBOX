@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test dati REBOX</title>
+<script src="config.js"></script>
+<style>body{font-family:Arial;padding:20px} #out{font-size:18px;line-height:1.7} .ok{color:#1a7a1a} .no{color:#b00000}</style>
+</head>
+<body>
+<h1>Test dati REBOX</h1>
+<p id="out">Caricamento...</p>
+<script>
+function show(msg, ok){
+  var el = document.getElementById('out');
+  el.innerHTML = msg;
+  el.className = ok ? 'ok' : 'no';
+}
+(function(){
+  var url = window.REBOX_SB_URL || '';
+  var key = window.REBOX_SB_KEY || '';
+  if(!url || url.indexOf('TUO-PROGETTO') !== -1){
+    show('CONFIG.JS NON CARICATO: questo iPhone non trova l\'indirizzo Supabase.<br>URL visto: ' + url, false);
+    return;
+  }
+  show('Config OK. Provo a scaricare i dati da Supabase...<br>URL: ' + url, true);
+  fetch(url + '/rest/v1/rebox_settings?id=eq.products', {headers:{'apikey':key,'Authorization':'Bearer '+key}})
+    .then(function(r){ return r.json().then(function(j){ return {status:r.status, body:j}; }); })
+    .then(function(res){
+      var j = res.body;
+      if(j && j[0] && Array.isArray(j[0].value)){
+        show('DATI OK! Prodotti trovati: ' + j[0].value.length + '<br>Se qui li vedi e nella home no, il problema e\' nella home, non nell\'iPhone.', true);
+      } else {
+        show('Supabase risponde ma non trova i prodotti. Risposta: ' + JSON.stringify(j).slice(0,300), false);
+      }
+    })
+    .catch(function(e){
+      show('FETCH BLOCCATO: questo iPhone non riesce a contattare Supabase.<br>Errore: ' + (e && e.message ? e.message : e), false);
+    });
+})();
+</script>
+</body>
+</html>
