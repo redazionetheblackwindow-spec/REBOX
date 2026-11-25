@@ -947,7 +947,7 @@ document.addEventListener('DOMContentLoaded', ()=>{ setTimeout(syncBoxStocksFrom
   async function cloudGet(id){
     var c=cloudCfg(); if(!c) return null;
     try{
-      var r=await fetch(c.url+'/rest/v1/rebox_settings?id=eq.'+encodeURIComponent(id)+'&_t='+Date.now(), {headers:{'apikey':c.key,'Authorization':'Bearer '+c.key,'Cache-Control':'no-cache'}, cache:'no-store'});
+      var r=await fetch(c.url+'/rest/v1/rebox_settings?id=eq.'+encodeURIComponent(id), {cache:'no-store',headers:{'apikey':c.key,'Authorization':'Bearer '+c.key,'Cache-Control':'no-cache'}, cache:'no-store'});
       var j=await r.json(); return (j&&j[0])?j[0].value:null;
     }catch(e){ console.log('cloudGet',id,e); return null; }
   }
