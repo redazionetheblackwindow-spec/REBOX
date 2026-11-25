@@ -171,3 +171,71 @@ async function reboxPushLocalToCloudIfEmpty(){
 }
 setTimeout(reboxPushLocalToCloudIfEmpty, 2000);
 });
+
+// ===== REBOX CODICE INVITO STABILE: un account = un codice, su tutti i PC =====
+// Prima succedeva che su un PC nuovo l'account veniva ricreato con un codice nuovo,
+// e quel codice nuovo finiva pure in Supabase. Ora: per ogni email resta UN SOLO record
+// e per codice invito e invitato-da vince quello che sta in Supabase (il primo arrivato,
+// quello condiviso da tutti i PC). Così tutti i PC convergono sullo stesso codice
+// e nessuno genera più un codice a ogni accesso. Sostituisce la versione precedente.
+async function reboxLoadUsersFromCloud(){
+  try{
+    var url=localStorage.getItem('reboxSbUrl')||window.REBOX_SB_URL||'';
+    var key=localStorage.getItem('reboxSbKey')||window.REBOX_SB_KEY||'';
+    if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return;
+    var r=await fetch(url+'/rest/v1/rebox_settings?id=eq.users',{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+    var j=await r.json();
+    if(j&&j[0]&&Array.isArray(j[0].value)){
+      var local=[]; try{ local=JSON.parse(localStorage.getItem('reboxUsers')||'[]'); }catch(e){}
+      var byEmail={}; local.forEach(function(u){ if(u.email) byEmail[String(u.email).toLowerCase()]=u; });
+      var changed=false; var seenCloud={};
+      j[0].value.forEach(function(cu){
+        if(!cu||!cu.email) return;
+        var em=String(cu.email).toLowerCase();
+        if(seenCloud[em]) return; // duplicato in cloud: conta solo il primo
+        seenCloud[em]=true;
+        var ex=byEmail[em];
+        if(!ex){ local.push(cu); byEmail[em]=cu; changed=true; }
+        else {
+          // Vince Supabase per codice invito e invitato-da: è la verità condivisa da tutti i PC
+          if(cu.refCode && ex.refCode!==cu.refCode){ ex.refCode=cu.refCode; changed=true; }
+          if(cu.referredBy && ex.referredBy!==cu.referredBy){ ex.referredBy=cu.referredBy; changed=true; }
+          ['name','phone'].forEach(function(f){ if(!ex[f] && cu[f]){ ex[f]=cu[f]; changed=true; } });
+        }
+      });
+      // Toglie eventuali doppioni locali con la stessa email (resta il primo)
+      var seenLocal={}; var deduped=[];
+      local.forEach(function(u){ var em2=u.email?String(u.email).toLowerCase():''; if(em2 && seenLocal[em2]) return; if(em2) seenLocal[em2]=true; deduped.push(u); });
+      if(deduped.length!==local.length){ local=deduped; changed=true; }
+      if(changed){
+        localStorage.setItem('reboxUsers', JSON.stringify(local));
+        try{ allUsers=local; }catch(e){}
+        if(typeof currentUser!=='undefined' && currentUser){
+          var me=byEmail[String(currentUser.email).toLowerCase()];
+          if(me){ currentUser=me; localStorage.setItem('reboxCurrentUser', JSON.stringify(currentUser)); }
+        }
+        if(typeof renderReferralPanel==='function') renderReferralPanel();
+        if(typeof renderReferralAdmin==='function') renderReferralAdmin();
+      }
+    }
+  }catch(e){ console.log('load utenti cloud',e); }
+}
+document.addEventListener('DOMContentLoaded', function(){
+  try{
+    // Prima di salvare gli utenti in Supabase, toglie i doppioni con stessa email.
+    // Così un doppione non finisce mai più in cloud.
+    if(typeof window.saveUsersToCloud==='function' && !window.saveUsersToCloud._reboxDedupe){
+      var _origSaveUsers=window.saveUsersToCloud;
+      window.saveUsersToCloud=function(){
+        try{
+          var au=[]; try{ au=JSON.parse(localStorage.getItem('reboxUsers')||'[]'); }catch(e){}
+          var seen={}; var dd=[];
+          au.forEach(function(u){ var em=u.email?String(u.email).toLowerCase():''; if(em && seen[em]) return; if(em) seen[em]=true; dd.push(u); });
+          if(dd.length!==au.length){ localStorage.setItem('reboxUsers', JSON.stringify(dd)); try{ allUsers=dd; }catch(e){} }
+        }catch(e){}
+        return _origSaveUsers.apply(this, arguments);
+      };
+      window.saveUsersToCloud._reboxDedupe=true;
+    }
+  }catch(e){ console.log('dedupe save utenti',e); }
+});
