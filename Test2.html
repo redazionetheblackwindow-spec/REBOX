@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test2 REBOX</title>
+<script src="config.js"></script>
+</head>
+<body>
+<h1>Test2 REBOX</h1>
+<p id="out">Se leggi questo testo, il codice NON e' partito: il tuo iPhone NON capisce il simbolo ?.</p>
+<p id="out2"></p>
+<script>
+var el = document.getElementById('out');
+var el2 = document.getElementById('out2');
+try {
+  var prova = document.getElementById('nonesiste')?.value;
+  el.textContent = '?. FUNZIONA: il tuo iPhone capisce il simbolo. Il problema e\' altrove.';
+} catch(e) {
+  el.textContent = '?. da errore: ' + e.message;
+}
+try {
+  var cart = localStorage.getItem('reboxCart');
+  var prod = localStorage.getItem('reboxAdminProducts');
+  var msg = 'Carrello salvato: ' + (cart ? cart.slice(0,120) : '(vuoto)') + '<br>Prodotti salvati: ' + (prod ? prod.slice(0,120) : '(vuoto)');
+  try { JSON.parse(cart || '[]'); msg += '<br>Carrello: JSON OK'; } catch(e2) { msg += '<br>Carrello: JSON ROTTO! Errore: ' + e2.message; }
+  try { JSON.parse(prod || '[]'); msg += '<br>Prodotti: JSON OK'; } catch(e3) { msg += '<br>Prodotti: JSON ROTTO! Errore: ' + e3.message; }
+  el2.innerHTML = msg;
+} catch(e4) {
+  el2.textContent = 'localStorage bloccato: ' + e4.message;
+}
+</script>
+</body>
+</html>
