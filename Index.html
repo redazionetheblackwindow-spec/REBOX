@@ -1108,7 +1108,7 @@ function lotDimmedReason(lot){
     if(window._reboxRefreshing) return; window._reboxRefreshing=true;
     try{
       var pv=await cloudGet('products');
-      if(Array.isArray(pv)){ window.adminProducts=pv; normProducts(); try{ localStorage.setItem('reboxAdminProducts', JSON.stringify(window.adminProducts)); }catch(e){} }
+      if(Array.isArray(pv)){ adminProducts=pv; window.adminProducts=pv; normProducts(); try{ localStorage.setItem('reboxAdminProducts', JSON.stringify(window.adminProducts)); }catch(e){} }
       var av=await cloudGet('auctions');
       if(Array.isArray(av)){ window.auctions=av; try{ localStorage.setItem('reboxAuctions', JSON.stringify(av)); }catch(e){} }
       var bv=await cloudGet('box_stocks');
