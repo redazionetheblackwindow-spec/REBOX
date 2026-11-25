@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Test3 REBOX</title>
+<script src="config.js"></script>
+</head>
+<body>
+<h1>Test3 - Cosa vede l'iPhone</h1>
+<p id="out">Caricamento...</p>
+<script>
+function show(msg){ document.getElementById('out').innerHTML = msg; }
+(function(){
+  var url = window.REBOX_SB_URL || '';
+  var key = window.REBOX_SB_KEY || '';
+  if(!url){ show('Config mancante'); return; }
+  function get(id){
+    return fetch(url + '/rest/v1/rebox_settings?id=eq.' + id, {headers:{'apikey':key,'Authorization':'Bearer '+key}})
+      .then(function(r){ return r.json(); })
+      .then(function(j){ return (j && j[0] && j[0].value !== undefined) ? j[0].value : null; });
+  }
+  get('products').then(function(prods){
+    var msg = '';
+    if(!prods){ msg += '<b>PRODOTTI:</b> nessuno trovato in Supabase<br><br>'; }
+    else {
+      var vis = prods.filter(function(p){ return !p.blocked; });
+      var nov = prods.filter(function(p){ return p.isNew && !p.blocked; });
+      msg += '<b>PRODOTTI:</b> ' + prods.length + ' totali, ' + vis.length + ' visibili, <b>' + nov.length + ' con NOVITA attiva</b><br>';
+      msg += 'La home mostra SOLO i prodotti con NOVITA attiva. Se NOVITA = 0, la home mostra "Ancora nessuna novita" e sembra vuota!<br>';
+      msg += 'Nomi: ' + prods.map(function(p){ return p.name; }).join(' | ') + '<br><br>';
+    }
+    return get('auctions').then(function(aucs){
+      if(!aucs){ msg += '<b>ASTE:</b> nessuna trovata<br><br>'; }
+      else {
+        msg += '<b>ASTE:</b> ' + aucs.length + ' trovate. Nomi: ' + aucs.map(function(a){ return a.name; }).join(' | ') + '<br>';
+        var noBids = aucs.filter(function(a){ return !a.bids; });
+        if(noBids.length) msg += '<b>ATTENZIONE: ' + noBids.length + ' aste SENZA elenco offerte: questo blocca la home!</b><br>';
+        msg += '<br>';
+      }
+      return get('box_stocks').then(function(bs){
+        msg += '<b>PACCHI (box_stocks):</b> ' + JSON.stringify(bs) + '<br><br>';
+        return get('lots').then(function(lots){
+          if(!lots){ msg += '<b>LOTTI:</b> nessuno trovato<br>'; }
+          else { msg += '<b>LOTTI:</b> ' + (lots.length || 0) + ' trovati<br>'; }
+          show(msg);
+        });
+      });
+    });
+  }).catch(function(e){
+    show('ERRORE: ' + (e && e.message ? e.message : e));
+  });
+})();
+</script>
+</body>
+</html>
