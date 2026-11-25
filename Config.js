@@ -141,8 +141,33 @@ document.addEventListener('DOMContentLoaded', function(){
   try{
     if(typeof window.saveAdmin==='function' && !window.saveAdmin._reboxFixed){
       var _origSaveAdmin=window.saveAdmin;
+
       window.saveAdmin=function(){ _origSaveAdmin(); try{ localStorage.removeItem('reboxSbUrl'); localStorage.removeItem('reboxSbKey'); }catch(e){} };
       window.saveAdmin._reboxFixed=true;
     }
   }catch(e){ console.log('blocca saveAdmin supabase', e); }
+
+// ===== REBOX BOOTSTRAP: se Supabase è vuoto ma il browser ha dati, spingili su =====
+// Serve la prima volta, dopo aver creato la tabella: utenti e ordini che finora stavano
+// solo nel browser del PC vengono caricati in Supabase. Spinge SOLO se la riga in cloud
+// è vuota o manca: non sovrascrive mai dati che ci sono già.
+async function reboxPushLocalToCloudIfEmpty(){
+  try{
+    var url=window.REBOX_SB_URL||'', key=window.REBOX_SB_KEY||'';
+    if(!url||!key||url.indexOf('TUO-PROGETTO')!==-1) return;
+    var jobs=[{id:'users', localKey:'reboxUsers'}, {id:'orders', localKey:'reboxOrders'}, {id:'referral_rewards', localKey:'reboxReferralRewards'}];
+    for(var i=0;i<jobs.length;i++){
+      var job=jobs[i];
+      var local=[]; try{ local=JSON.parse(localStorage.getItem(job.localKey)||'[]'); }catch(e){}
+      if(!Array.isArray(local)||!local.length) continue;
+      var r=await fetch(url+'/rest/v1/rebox_settings?id=eq.'+job.id,{headers:{'apikey':key,'Authorization':'Bearer '+key}});
+      var j=await r.json();
+      var cloudEmpty=!j||!j.length||!Array.isArray(j[0].value)||!j[0].value.length;
+      if(cloudEmpty){
+        await fetch(url+'/rest/v1/rebox_settings',{method:'POST',headers:{'apikey':key,'Authorization':'Bearer '+key,'Content-Type':'application/json','Prefer':'resolution=merge-duplicates'},body:JSON.stringify({id:job.id,value:local})});
+      }
+    }
+  }catch(e){ console.log('bootstrap cloud',e); }
+}
+setTimeout(reboxPushLocalToCloudIfEmpty, 2000);
 });
